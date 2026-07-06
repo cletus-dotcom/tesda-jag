@@ -62,4 +62,14 @@ def writable_upload_root(app_root_path):
 
 
 def should_bootstrap_database():
-    return os.getenv("SKIP_DB_BOOTSTRAP", "").lower() not in ("1", "true", "yes")
+    """Run create_all/migrations on startup.
+
+    Skipped when SKIP_DB_BOOTSTRAP is set, and by default on serverless
+    (Vercel) where schema is applied via Supabase migrations.
+    """
+    flag = os.getenv("SKIP_DB_BOOTSTRAP", "").lower()
+    if flag in ("1", "true", "yes"):
+        return False
+    if flag in ("0", "false", "no"):
+        return True
+    return not is_serverless_runtime()

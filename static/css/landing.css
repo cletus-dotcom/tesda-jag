@@ -5,6 +5,240 @@ body.landing-body {
     color: var(--portal-text);
 }
 
+body.landing-body.portal-loading {
+    overflow: hidden;
+}
+
+/* ── Portal startup splash (career pathway) ── */
+.portal-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background:
+        linear-gradient(165deg, var(--charcoal) 0%, var(--slate-deep) 55%, rgba(0, 32, 128, 0.35) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.55s ease, visibility 0.55s ease;
+}
+
+.portal-splash.done {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.splash-scene {
+    position: relative;
+    width: min(340px, 88vw);
+    height: 210px;
+    margin-bottom: 1.75rem;
+}
+
+.splash-logo {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) scale(0.72);
+    width: 64px;
+    height: 64px;
+    opacity: 0;
+    animation: splashLogoReveal 0.7s ease forwards;
+    animation-delay: 2.05s;
+}
+
+.splash-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+    filter: drop-shadow(0 6px 18px var(--accent-glow));
+}
+
+.splash-ground {
+    position: absolute;
+    bottom: 28px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--slate-light);
+}
+
+.splash-ground::before {
+    content: "";
+    position: absolute;
+    inset: -6px 0 auto;
+    height: 1px;
+    background: repeating-linear-gradient(
+        90deg,
+        var(--tesda-blue-light) 0,
+        var(--tesda-blue-light) 12px,
+        transparent 12px,
+        transparent 24px
+    );
+    opacity: 0.45;
+}
+
+.skills-stack {
+    position: absolute;
+    bottom: 31px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 4px;
+}
+
+.skill-layer {
+    height: 0;
+    background: var(--slate-mid);
+    border: 2px solid var(--slate-light);
+    border-radius: var(--radius-sm);
+    opacity: 0;
+    animation: skillLayerRise 0.55s ease forwards;
+}
+
+.skill-layer::after {
+    content: "";
+    display: block;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(26, 86, 196, 0.2) 0%, transparent 65%);
+}
+
+.skill-layer:nth-child(1) { width: 120px; animation-delay: 0.35s; }
+.skill-layer:nth-child(2) { width: 100px; animation-delay: 0.8s; }
+.skill-layer:nth-child(3) { width: 80px; animation-delay: 1.25s; }
+.skill-layer:nth-child(4) {
+    width: 56px;
+    animation-delay: 1.7s;
+    border-color: var(--tesda-blue-light);
+    animation-name: skillLayerRise, skillCapPulse;
+    animation-duration: 0.55s, 1.2s;
+    animation-delay: 1.7s, 2.25s;
+    animation-iteration-count: 1, infinite;
+    animation-fill-mode: forwards, none;
+}
+
+@keyframes skillLayerRise {
+    0% { height: 0; opacity: 0; transform: translateY(8px); }
+    60% { opacity: 1; }
+    100% { height: 22px; opacity: 1; transform: translateY(0); }
+}
+
+@keyframes skillCapPulse {
+    0%, 100% { box-shadow: 0 0 0 rgba(26, 86, 196, 0); }
+    50% { box-shadow: 0 0 14px var(--accent-glow); }
+}
+
+@keyframes splashLogoReveal {
+    0% { opacity: 0; transform: translateX(-50%) scale(0.72) translateY(8px); }
+    100% { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+}
+
+.route-traveler {
+    position: absolute;
+    bottom: 30px;
+    left: -72px;
+    width: 56px;
+    height: 26px;
+    animation: routeTravel 2.9s ease-in-out infinite;
+}
+
+.route-marker {
+    position: absolute;
+    left: 0;
+    bottom: 8px;
+    width: 34px;
+    height: 10px;
+    background: var(--tesda-blue);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.route-marker::before {
+    content: "";
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 7px solid var(--tesda-blue-light);
+}
+
+.route-wheel {
+    position: absolute;
+    bottom: 0;
+    width: 10px;
+    height: 10px;
+    background: var(--charcoal);
+    border: 2px solid var(--slate-light);
+    border-radius: 50%;
+    animation: routeWheelSpin 0.45s linear infinite;
+}
+
+.route-wheel:nth-of-type(1) { left: 6px; }
+.route-wheel:nth-of-type(2) { right: 6px; }
+
+@keyframes routeTravel {
+    0% { left: -72px; opacity: 0; }
+    8% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { left: calc(100% + 16px); opacity: 0; }
+}
+
+@keyframes routeWheelSpin {
+    to { transform: rotate(360deg); }
+}
+
+.splash-tagline {
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: clamp(1rem, 3.5vw, 1.2rem);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-white);
+    margin: 0;
+}
+
+.splash-tagline span {
+    color: var(--tesda-blue-light);
+}
+
+.splash-sub {
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0.45rem 0 0;
+}
+
+.splash-progress {
+    margin-top: 1rem;
+    width: min(260px, 72vw);
+    height: 3px;
+    background: var(--slate-mid);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.splash-progress-bar {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--tesda-blue-dark), var(--tesda-blue-light));
+    border-radius: var(--radius-sm);
+    animation: splashProgressFill 2.5s ease forwards;
+}
+
+@keyframes splashProgressFill {
+    to { width: 100%; }
+}
+
 .portal {
     min-height: calc(100vh - var(--app-topbar-height));
     display: flex;
@@ -546,8 +780,27 @@ body.landing-body {
     .logo-wrap img,
     .app-brand-tagline-track,
     .timeline-track,
-    .module-icon.glow::after {
+    .module-icon.glow::after,
+    .skill-layer,
+    .route-traveler,
+    .route-wheel,
+    .splash-logo,
+    .splash-progress-bar {
         animation: none !important;
+    }
+
+    .skill-layer {
+        height: 22px;
+        opacity: 1;
+    }
+
+    .splash-logo {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+
+    .splash-progress-bar {
+        width: 100%;
     }
 
     .app-brand-tagline-item[aria-hidden="true"] {

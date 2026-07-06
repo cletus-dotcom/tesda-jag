@@ -1,5 +1,6 @@
-from sqlalchemy import or_
+from sqlalchemy import and_, func, or_
 
+from app import db
 from app.config import display_rmt_record_type
 from app.models import RmtRecord
 
@@ -58,10 +59,32 @@ def search_records_query(term):
 
 
 def rmt_dashboard_stats():
-    records = RmtRecord.query.all()
-    cabinets = {record.cabinet_number for record in records if record.cabinet_number}
+    total_records = db.session.query(func.count(RmtRecord.id)).scalar() or 0
+    total_cabinets = (
+        db.session.query(func.count(func.distinct(RmtRecord.cabinet_number)))
+        .filter(
+            RmtRecord.cabinet_number.isnot(None),
+            RmtRecord.cabinet_number != "",
+        )
+        .scalar()
+        or 0
+    )
+    with_pdf = (
+        db.session.query(func.count(RmtRecord.id))
+        .filter(
+            or_(
+                and_(RmtRecord.pdf_link.isnot(None), RmtRecord.pdf_link != ""),
+                and_(
+                    RmtRecord.local_file_path.isnot(None),
+                    RmtRecord.local_file_path != "",
+                ),
+            )
+        )
+        .scalar()
+        or 0
+    )
     return {
-        "total_records": len(records),
-        "total_cabinets": len(cabinets),
-        "with_pdf": sum(1 for record in records if record.pdf_link or record.local_file_path),
+        "total_records": total_records,
+        "total_cabinets": total_cabinets,
+        "with_pdf": with_pdf,
     }

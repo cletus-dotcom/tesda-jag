@@ -1,9 +1,8 @@
-from sqlalchemy import or_
+from sqlalchemy import func, or_, tuple_
 
+from app import db
 from app.config import display_recipient
-from app.dashboard_service import inbound_docs_query, outbound_docs_query
 from app.models import DtsDoc, DtsHistory, RmtRecord
-from app.rmt_service import rmt_dashboard_stats
 
 
 def _format_history_action(entry):
@@ -47,26 +46,70 @@ def _format_rmt_action(record):
     }
 
 
+def _count_inbound_active():
+    return (
+        db.session.query(func.count(DtsDoc.id))
+        .filter(
+            DtsDoc.classification == "Inbound",
+            or_(
+                DtsDoc.status.is_(None),
+                func.lower(DtsDoc.status) != "completed",
+            ),
+        )
+        .scalar()
+        or 0
+    )
+
+
+def _count_pending_approvals():
+    return (
+        db.session.query(func.count(DtsDoc.id))
+        .filter(func.lower(DtsDoc.status) == "pending")
+        .scalar()
+        or 0
+    )
+
+
+def _count_rmt_records():
+    return db.session.query(func.count(RmtRecord.id)).scalar() or 0
+
+
+def _count_distinct_record_types():
+    return (
+        db.session.query(
+            func.count(
+                func.distinct(
+                    tuple_(RmtRecord.record_type, RmtRecord.record_type_part)
+                )
+            )
+        )
+        .filter(
+            RmtRecord.record_type.isnot(None),
+            RmtRecord.record_type != "",
+        )
+        .scalar()
+        or 0
+    )
+
+
+def _count_distinct_cabinets():
+    return (
+        db.session.query(func.count(func.distinct(RmtRecord.cabinet_number)))
+        .filter(
+            RmtRecord.cabinet_number.isnot(None),
+            RmtRecord.cabinet_number != "",
+        )
+        .scalar()
+        or 0
+    )
+
+
 def portal_pulse_data():
-    inbound_docs = inbound_docs_query().all()
-    outbound_docs = outbound_docs_query().all()
-    all_docs = inbound_docs + outbound_docs
-
-    new_inbound = sum(
-        1 for doc in inbound_docs
-        if (doc.status or "").lower() not in ("completed",)
-    )
-    pending_approvals = sum(
-        1 for doc in all_docs
-        if (doc.status or "").lower() == "pending"
-    )
-
-    rmt_stats = rmt_dashboard_stats()
-    record_types = {
-        (record.record_type or "General", record.record_type_part or "")
-        for record in RmtRecord.query.all()
-        if record.record_type
-    }
+    new_inbound = _count_inbound_active()
+    pending_approvals = _count_pending_approvals()
+    total_records = _count_rmt_records()
+    record_type_count = _count_distinct_record_types()
+    cabinet_count = _count_distinct_cabinets()
 
     history_actions = [
         _format_history_action(entry)
@@ -96,8 +139,8 @@ def portal_pulse_data():
             "pending_approvals": pending_approvals,
         },
         "rmt": {
-            "active_profiles": rmt_stats["total_records"],
-            "class_batches": len(record_types) or rmt_stats["total_cabinets"],
+            "active_profiles": total_records,
+            "class_batches": record_type_count or cabinet_count,
         },
         "pmis": {
             "equipment_checked_out": 0,

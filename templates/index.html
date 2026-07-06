@@ -14,6 +14,29 @@
 {% endblock %}
 
 {% block body %}
+<div class="portal-splash" id="portalSplash" aria-live="polite" aria-label="Loading TESDA PTC-Jagna portal">
+    <div class="splash-scene" aria-hidden="true">
+        <div class="splash-logo">
+            <img src="{{ url_for('static', filename='images/tesda_logo.png') }}" alt="">
+        </div>
+        <div class="skills-stack">
+            <div class="skill-layer"></div>
+            <div class="skill-layer"></div>
+            <div class="skill-layer"></div>
+            <div class="skill-layer"></div>
+        </div>
+        <div class="route-traveler">
+            <div class="route-marker"></div>
+            <div class="route-wheel"></div>
+            <div class="route-wheel"></div>
+        </div>
+        <div class="splash-ground"></div>
+    </div>
+    <p class="splash-tagline">Building <span>Careers</span></p>
+    <p class="splash-sub">Gateway to Mindanao &middot; Est. 1997</p>
+    <div class="splash-progress"><div class="splash-progress-bar"></div></div>
+</div>
+
 <div class="portal">
 
     <header class="hero-banner">
@@ -136,6 +159,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{{ url_for('static', filename='js/portal-splash.js') }}"></script>
 <script>
     const moduleLabels = { dts: "Document Tracking", rmt: "Records Management", pmis: "Property Inventory" };
 

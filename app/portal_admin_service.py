@@ -1,10 +1,6 @@
 from datetime import date, datetime
 from io import BytesIO
 
-from openpyxl import Workbook, load_workbook
-from openpyxl.styles import Font, PatternFill
-from openpyxl.utils import get_column_letter
-
 from app import db
 from app.config import (
     CLASSIFICATIONS,
@@ -59,8 +55,13 @@ RMT_IMPORT_FIELDS = [
     ("encoded_by", "Encoded By", False),
 ]
 
-HEADER_FILL = PatternFill("solid", fgColor="0033A0")
-HEADER_FONT = Font(color="FFFFFF", bold=True)
+def _excel_styles():
+    from openpyxl.styles import Font, PatternFill
+
+    return (
+        PatternFill("solid", fgColor="0033A0"),
+        Font(color="FFFFFF", bold=True),
+    )
 
 
 def _field_keys(fields):
@@ -110,6 +111,10 @@ def _coerce_import_date(value, required=False):
 
 
 def build_template_workbook(fields, sheet_name, notes):
+    from openpyxl import Workbook
+    from openpyxl.utils import get_column_letter
+
+    header_fill, header_font = _excel_styles()
     workbook = Workbook()
     sheet = workbook.active
     sheet.title = sheet_name
@@ -117,8 +122,8 @@ def build_template_workbook(fields, sheet_name, notes):
     headers = _field_headers(fields)
     for col_idx, header in enumerate(headers, start=1):
         cell = sheet.cell(row=1, column=col_idx, value=header)
-        cell.fill = HEADER_FILL
-        cell.font = HEADER_FONT
+        cell.fill = header_fill
+        cell.font = header_font
         sheet.column_dimensions[get_column_letter(col_idx)].width = max(len(header) + 2, 18)
 
     instructions = workbook.create_sheet("Instructions")
@@ -161,6 +166,8 @@ def _map_headers(header_row, fields):
 
 
 def parse_workbook_rows(upload, fields):
+    from openpyxl import load_workbook
+
     workbook = load_workbook(upload, read_only=True, data_only=True)
     sheet = workbook.active
     rows = list(sheet.iter_rows(values_only=True))

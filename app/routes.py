@@ -15,12 +15,6 @@ from flask import (
     session,
     url_for,
 )
-from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
-from reportlab.lib.pagesizes import landscape, legal
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-from reportlab.lib.units import inch
-from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from werkzeug.security import generate_password_hash
 
 from app import db
@@ -801,6 +795,13 @@ def delete_dept_ref(id):
 @main_routes.route("/export_docs_pdf")
 @login_required
 def export_docs_pdf():
+    from reportlab.lib import colors
+    from reportlab.lib.enums import TA_CENTER, TA_LEFT
+    from reportlab.lib.pagesizes import landscape, legal
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import inch
+    from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
     buffer = BytesIO()
     docs = DtsDoc.query.order_by(DtsDoc.origin.asc(), DtsDoc.route_number.asc()).all()
 
