@@ -1,0 +1,1218 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard — TESDA PTC-JAGNA DTS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tesda-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app-navbar.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/tesda_logo.png') }}">
+    <style>
+        :root {
+            --tesda-blue: {{ tesda_blue }};
+            --tesda-blue-dark: {{ tesda_blue_dark }};
+            --tesda-blue-light: {{ tesda_blue_light }};
+            --sidebar-bg: #002080;
+            --sidebar-width: 260px;
+            --topbar-height: var(--app-chrome-offset);
+            --transition-time: 250ms;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background: linear-gradient(165deg, #f8faff 0%, #e8eef8 100%);
+        }
+        body.no-scroll { overflow: hidden; }
+        body.sidebar-open::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1100;
+        }
+
+        .bg-tesda { background-color: var(--tesda-blue) !important; }
+        .text-tesda { color: var(--tesda-blue); }
+        .btn-tesda {
+            background-color: var(--tesda-blue);
+            border-color: var(--tesda-blue);
+            color: #fff;
+        }
+        .btn-tesda:hover {
+            background-color: var(--tesda-blue-dark);
+            border-color: var(--tesda-blue-dark);
+            color: #fff;
+        }
+
+        /* Top bar */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--topbar-height);
+            background: var(--tesda-blue);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0 1rem;
+            z-index: 1300;
+            box-shadow: 0 2px 12px rgba(0, 32, 128, 0.25);
+        }
+        .btn-menu {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.35rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 8px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .btn-menu:hover { background: rgba(255, 255, 255, 0.12); }
+        .topbar-title {
+            font-weight: 700;
+            font-size: 1rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .topbar-search {
+            flex: 1;
+            max-width: 360px;
+            position: relative;
+            min-width: 0;
+        }
+        .topbar-search .form-control {
+            border: none;
+            border-radius: 8px;
+            padding: 0.4rem 0.75rem 0.4rem 2.25rem;
+            font-size: 0.875rem;
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .topbar-search .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+        #suggestionsBox {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            z-index: 1400;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+        .btn-new-doc {
+            background: #fff;
+            color: var(--tesda-blue);
+            border: none;
+            font-weight: 600;
+            font-size: 0.8rem;
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            text-decoration: none;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .btn-new-doc:hover {
+            background: #e8eef8;
+            color: var(--tesda-blue-dark);
+        }
+        .topbar-time {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            white-space: nowrap;
+            display: none;
+        }
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            padding: 0.25rem 0.75rem 0.25rem 0.35rem;
+            font-size: 0.75rem;
+            max-width: 180px;
+        }
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #fff;
+            color: var(--tesda-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+        }
+        .user-chip-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            line-height: 1.2;
+        }
+        .user-chip-text strong { display: block; font-size: 0.7rem; }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: var(--topbar-height);
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            color: #fff;
+            transform: translateX(-110%);
+            transition: transform var(--transition-time) ease;
+            z-index: 1200;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem 0.75rem;
+        }
+        .sidebar.visible { transform: translateX(0); }
+        .sidebar-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(255, 255, 255, 0.45);
+            padding: 0.5rem 0.75rem 0.35rem;
+        }
+        .sidebar-nav { list-style: none; padding: 0; margin: 0 0 0.5rem; }
+        .sidebar-nav a,
+        .sidebar-nav button.sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            width: 100%;
+            padding: 0.65rem 0.75rem;
+            border: none;
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background: transparent;
+            text-align: left;
+            transition: background 0.15s ease;
+        }
+        .sidebar-nav a:hover,
+        .sidebar-nav button.sidebar-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        .sidebar-nav a.active {
+            background: linear-gradient(135deg, var(--tesda-blue-light) 0%, var(--tesda-blue) 100%);
+            color: #fff;
+            font-weight: 600;
+        }
+        .sidebar-nav a i { font-size: 1.1rem; width: 1.25rem; text-align: center; }
+        #adminSubMenu { padding-left: 0.5rem; }
+        #adminSubMenu .sidebar-sublink {
+            display: block;
+            padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        #adminSubMenu .sidebar-sublink:hover {
+            background: rgba(26, 86, 196, 0.35);
+            color: #fff;
+        }
+        .sidebar-footer {
+            margin-top: auto;
+            text-align: center;
+            padding-top: 1.5rem;
+        }
+        .sidebar-logo {
+            max-width: 80px;
+            opacity: 0.75;
+            object-fit: contain;
+        }
+
+        /* Main content */
+        .main-content {
+            margin-top: var(--topbar-height);
+            padding: 1.25rem 1rem 2rem;
+            min-height: calc(100vh - var(--topbar-height));
+            box-sizing: border-box;
+        }
+        .page-header {
+            margin-bottom: 1.25rem;
+        }
+        .page-header h5 {
+            font-weight: 700;
+            color: var(--tesda-blue);
+            margin: 0 0 0.25rem;
+        }
+        .page-header p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        .doc-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 51, 160, 0.06);
+        }
+        .doc-card .doc-num { font-weight: 700; color: var(--tesda-blue); font-size: 0.95rem; }
+        .doc-card .doc-meta { font-size: 0.8rem; color: #64748b; }
+        .doc-card .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+        .doc-card .actions .btn { font-size: 0.8rem; padding: 0.35rem 0.75rem; }
+        .desktop-table { display: none; }
+        .mobile-cards { display: block; }
+        .content-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 51, 160, 0.08);
+            overflow: hidden;
+        }
+        .dashboard-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0, 51, 160, 0.08);
+            border: 1px solid rgba(0, 51, 160, 0.06);
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+        .welcome-card {
+            background: linear-gradient(135deg, var(--tesda-blue-dark) 0%, var(--tesda-blue) 55%, var(--tesda-blue-light) 100%);
+            color: #fff;
+        }
+        .welcome-card-inner {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .welcome-card-content {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .welcome-new-doc-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-shrink: 0;
+            background: #fff;
+            color: var(--tesda-blue);
+            font-weight: 700;
+            font-size: 0.88rem;
+            padding: 0.55rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            white-space: nowrap;
+        }
+        .welcome-new-doc-btn:hover {
+            background: #f0f4ff;
+            color: var(--tesda-blue-dark);
+        }
+        .welcome-card h4 { font-weight: 700; margin: 0 0 0.35rem; }
+        .welcome-card p { margin: 0; opacity: 0.92; font-size: 0.9rem; }
+        .welcome-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.25rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+        .welcome-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        @media (min-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(5, 1fr); }
+        }
+        .stat-tile {
+            background: linear-gradient(165deg, #f8faff 0%, #eef3fb 100%);
+            border: 1px solid rgba(0, 51, 160, 0.08);
+            border-radius: 12px;
+            padding: 0.9rem 1rem;
+            text-align: center;
+        }
+        .stat-tile .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--tesda-blue);
+            line-height: 1.1;
+        }
+        .stat-tile .stat-label {
+            font-size: 0.72rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .section-card h5 {
+            font-weight: 700;
+            color: var(--tesda-blue);
+            margin: 0;
+        }
+        .section-card .section-subtitle {
+            font-size: 0.82rem;
+            color: #64748b;
+            margin: 0.2rem 0 0;
+        }
+        .section-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        @media (min-width: 768px) {
+            .section-header {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+        .section-search {
+            position: relative;
+            max-width: 320px;
+            width: 100%;
+        }
+        .section-search .form-control {
+            padding-left: 2.1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+        .section-search i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            pointer-events: none;
+        }
+        .section-table-wrap {
+            max-height: 320px;
+            overflow: auto;
+            border: 1px solid rgba(0, 51, 160, 0.08);
+            border-radius: 10px;
+        }
+        .section-table { margin-bottom: 0; font-size: 0.85rem; }
+        .section-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: var(--tesda-blue);
+            color: #fff;
+            white-space: nowrap;
+        }
+        .section-table tbody tr:hover { background: #f8faff; }
+        .badge-inbound { background: #0d6efd; }
+        .badge-outbound { background: #198754; }
+        .section-mobile-list { display: block; }
+        .section-desktop-table { display: none; }
+        @media (min-width: 768px) {
+            .section-mobile-list { display: none; }
+            .section-desktop-table { display: block; }
+        }
+        .doc-row { cursor: pointer; }
+        .doc-row.expanded { background: #f8faff; }
+        .expand-btn {
+            color: var(--tesda-blue);
+            padding: 0;
+            border: none;
+            background: transparent;
+            line-height: 1;
+        }
+        .expand-btn i { transition: transform 0.2s ease; }
+        .doc-row.expanded .expand-btn i { transform: rotate(90deg); }
+        .detail-row td {
+            background: #f8faff;
+            padding: 0;
+            border-top: none;
+        }
+        .detail-panel {
+            padding: 1rem 1.25rem 1.1rem;
+            border-top: 2px solid rgba(0, 51, 160, 0.12);
+        }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.85rem 1rem;
+        }
+        .detail-item label {
+            display: block;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #64748b;
+            margin-bottom: 0.15rem;
+        }
+        .detail-item span,
+        .detail-item p {
+            display: block;
+            font-size: 0.85rem;
+            margin: 0;
+            color: #1e293b;
+        }
+        .detail-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .doc-card .detail-panel-mobile {
+            display: none;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(0, 51, 160, 0.1);
+        }
+        .doc-card.expanded .detail-panel-mobile { display: block; }
+        .doc-card .expand-mobile-btn {
+            padding: 0;
+            font-size: 0.8rem;
+            text-decoration: none;
+        }
+
+        @media (min-width: 576px) {
+            .topbar-time { display: block; }
+        }
+        @media (min-width: 768px) {
+            .desktop-table { display: block; }
+            .mobile-cards { display: none; }
+            .main-content { padding: 1.5rem; }
+        }
+        @media (min-width: 992px) {
+            body.sidebar-open::before { display: none; }
+            .sidebar {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: var(--sidebar-width);
+            }
+            .btn-menu { display: none; }
+        }
+        @media (max-width: 575px) {
+            .topbar-title { display: none; }
+            .topbar-search { max-width: none; }
+            .btn-new-doc span.label { display: none; }
+        }
+        @media (max-width: 400px) {
+            .user-chip-text { display: none; }
+        }
+
+        .modal-backdrop { z-index: 3000 !important; }
+        .modal { z-index: 3050 !important; }
+    </style>
+</head>
+<body class="has-app-navbar has-breadcrumbs dashboard-layout">
+    {% set breadcrumbs = [
+        {'label': 'Home', 'url': url_for('main_routes.index')},
+        {'label': 'Document Tracking', 'url': url_for('main_routes.dashboard')},
+        {'label': 'Dashboard'}
+    ] %}
+    {% set navbar_title = 'Dashboard' %}
+    {% set navbar_menu_toggle = true %}
+    {% include 'partials/app_navbar.html' %}
+
+    <!-- Sidebar: navigation -->
+    <aside id="sidebar" class="sidebar" aria-label="Main navigation">
+        <p class="sidebar-label">Navigation</p>
+        <ul class="sidebar-nav">
+            <li>
+                <a href="{{ url_for('main_routes.dashboard') }}" class="active">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('main_routes.list_docs') }}">
+                    <i class="bi bi-files"></i> List Documents
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('rmt_routes.dashboard') }}">
+                    <i class="bi bi-archive"></i> Records Management
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('pmis_routes.dashboard') }}">
+                    <i class="bi bi-box-seam"></i> P.M.I.S.
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('main_routes.index') }}">
+                    <i class="bi bi-house"></i> Home
+                </a>
+            </li>
+        </ul>
+
+        {% if is_admin_role(session.get('role')) %}
+        <p class="sidebar-label">Administration</p>
+        <ul class="sidebar-nav">
+            <li>
+                <button class="sidebar-link" id="adminOptionsBtn" type="button">
+                    <i class="bi bi-gear"></i> Admin Options
+                    <i class="bi bi-chevron-down ms-auto" id="adminChevron" style="font-size:0.75rem;"></i>
+                </button>
+            </li>
+        </ul>
+        <div id="adminSubMenu" class="d-none">
+            {% if is_portal_admin_role(session.get('role')) %}
+            <a href="{{ url_for('portal_admin_routes.console') }}" class="sidebar-sublink">Portal Console</a>
+            {% endif %}
+            <button id="manageUsersBtn" class="sidebar-sublink" type="button"
+                data-bs-toggle="modal" data-bs-target="#listUsersModal">Manage Users</button>
+            <a href="{{ url_for('main_routes.dept_ref_code') }}" class="sidebar-sublink">Manage Departments</a>
+            <a href="{{ url_for('main_routes.backup_database') }}" class="sidebar-sublink">Back-up Database</a>
+        </div>
+        {% endif %}
+
+        {% if not is_portal_admin_role(session.get('role')) %}
+        <ul class="sidebar-nav">
+            <li>
+                <button type="button" class="sidebar-link" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                    <i class="bi bi-key"></i> Change Password
+                </button>
+            </li>
+        </ul>
+        {% endif %}
+
+        <ul class="sidebar-nav mt-2">
+            <li>
+                <a href="/logout">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <img src="{{ url_for('static', filename='images/tesda_logo.png') }}" alt="TESDA" class="sidebar-logo">
+            <div class="text-white-50 small mt-2">&copy; TESDA PTC-JAGNA</div>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+        <div class="dashboard-card welcome-card">
+            <div class="welcome-card-inner">
+                <div class="welcome-card-content">
+                    <h4>Welcome, {{ fullname }}!</h4>
+                    <p>TESDA Provincial Training Center — Jagna Document Tracking Dashboard</p>
+                    <div class="welcome-meta">
+                        <span><i class="bi bi-building"></i> {{ office }}</span>
+                        <span><i class="bi bi-person-badge"></i> {{ role }}</span>
+                        <span><i class="bi bi-calendar3"></i> <span id="welcomeDate">—</span></span>
+                    </div>
+                </div>
+                {% if can_edit %}
+                <a href="{{ url_for('main_routes.add_document') }}" class="welcome-new-doc-btn">
+                    <i class="bi bi-plus-circle"></i> New Document
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <h5 class="text-tesda fw-bold mb-3">Document Statistics</h5>
+            <div class="stats-grid">
+                <div class="stat-tile">
+                    <div class="stat-value" id="statToday">—</div>
+                    <div class="stat-label">Today's Transactions</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="stat-value" id="statInbound">—</div>
+                    <div class="stat-label">Inbound</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="stat-value" id="statOutbound">—</div>
+                    <div class="stat-label">Outbound</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="stat-value" id="statPending">—</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="stat-value" id="statCompleted">—</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card section-card" id="todaySection">
+            <div class="section-header">
+                <div>
+                    <h5><i class="bi bi-inbox"></i> Today's Transactions</h5>
+                    <p class="section-subtitle">Active documents forwarded to <strong>{{ office }}</strong></p>
+                </div>
+                <div class="section-search">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="form-control section-filter" data-section="today" placeholder="Search transactions...">
+                </div>
+            </div>
+            <div class="section-mobile-list" id="todayMobile"></div>
+            <div class="section-desktop-table section-table-wrap">
+                <table class="table table-hover section-table mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 36px;"></th>
+                            <th>Doc #</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Origin</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="todayTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="dashboard-card section-card" id="inboundSection">
+            <div class="section-header">
+                <div>
+                    <h5><i class="bi bi-box-arrow-in-down"></i> Inbound Documents</h5>
+                    <p class="section-subtitle">All received inbound documents across the center</p>
+                </div>
+                <div class="section-search">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="form-control section-filter" data-section="inbound" placeholder="Search inbound documents...">
+                </div>
+            </div>
+            <div class="section-mobile-list" id="inboundMobile"></div>
+            <div class="section-desktop-table section-table-wrap">
+                <table class="table table-hover section-table mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 36px;"></th>
+                            <th>Doc #</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Origin</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inboundTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="dashboard-card section-card" id="outboundSection">
+            <div class="section-header">
+                <div>
+                    <h5><i class="bi bi-box-arrow-up-right"></i> Outbound Documents</h5>
+                    <p class="section-subtitle">All outgoing outbound documents across the center</p>
+                </div>
+                <div class="section-search">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="form-control section-filter" data-section="outbound" placeholder="Search outbound documents...">
+                </div>
+            </div>
+            <div class="section-mobile-list" id="outboundMobile"></div>
+            <div class="section-desktop-table section-table-wrap">
+                <table class="table table-hover section-table mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 36px;"></th>
+                            <th>Doc #</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Submitted To</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="outboundTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Manage Users Modal -->
+    <div class="modal fade" id="listUsersModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-tesda text-white">
+                    <h5 class="modal-title">Manage Users</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-end mb-3">
+                        <button class="btn btn-tesda" data-bs-toggle="modal" data-bs-target="#addUserModal">+ Add User</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle text-center">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Full Name</th>
+                                    <th>Role</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <tr><td colspan="4" class="text-muted">Loading users...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-tesda text-white">
+                    <h5 class="modal-title">Edit User</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editUserForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="editUserId">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Username</label>
+                                <input type="text" id="editUsername" name="username" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Password (leave blank to keep)</label>
+                                <input type="password" id="editPassword" name="password" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" id="editFullname" name="full_name" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Office</label>
+                                <select id="editOffice" name="office" class="form-select">
+                                    {% for dept in departments %}
+                                    <option value="{{ dept }}">{{ dept }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" id="editEmail" name="email" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Role</label>
+                                <select id="editRole" name="role" class="form-select">
+                                    {% for user_role in user_roles %}
+                                    <option value="{{ user_role }}">{{ user_role }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-tesda">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% include 'add_edit_modals.html' %}
+    {% if not is_portal_admin_role(session.get('role')) %}
+    {% include 'partials/change_password_modal.html' %}
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/brand-tagline-marquee.js') }}"></script>
+    <script>
+        const canEditDocuments = {{ 'true' if can_edit else 'false' }};
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const body = document.body;
+            const listUsersModal = document.getElementById('listUsersModal');
+            const tbody = document.getElementById('usersTableBody');
+            const sectionData = { today: [], inbound: [], outbound: [] };
+
+            const isDesktop = () => window.matchMedia('(min-width: 992px)').matches;
+
+            function closeSidebar() {
+                if (isDesktop()) return;
+                sidebar.classList.remove('visible');
+                body.classList.remove('no-scroll', 'sidebar-open');
+            }
+
+            menuToggle?.addEventListener('click', e => {
+                e.stopPropagation();
+                if (isDesktop()) return;
+                const isOpen = sidebar.classList.toggle('visible');
+                body.classList.toggle('no-scroll', isOpen);
+                body.classList.toggle('sidebar-open', isOpen);
+            });
+
+            document.addEventListener('click', e => {
+                if (isDesktop()) return;
+                const clickInside = sidebar.contains(e.target) || menuToggle?.contains(e.target);
+                if (!clickInside) closeSidebar();
+            });
+
+            document.getElementById('adminOptionsBtn')?.addEventListener('click', e => {
+                e.stopPropagation();
+                const sub = document.getElementById('adminSubMenu');
+                const chevron = document.getElementById('adminChevron');
+                sub?.classList.toggle('d-none');
+                if (chevron) {
+                    chevron.classList.toggle('bi-chevron-down');
+                    chevron.classList.toggle('bi-chevron-up');
+                }
+            });
+
+            listUsersModal?.addEventListener('shown.bs.modal', async () => {
+                if (!isDesktop()) closeSidebar();
+                tbody.innerHTML = '<tr><td colspan="4" class="text-muted">Loading...</td></tr>';
+                try {
+                    const res = await fetch('/list_users');
+                    const data = await res.json();
+                    if (data.users?.length) {
+                        tbody.innerHTML = data.users.map(u => `
+                            <tr>
+                                <td>${u.username}</td>
+                                <td>${u.full_name || '-'}</td>
+                                <td>${u.role || '-'}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="openEditUserModal('${u.id}','${u.username}','${u.full_name||''}','${u.office||''}','${u.email||''}','${u.role||''}')">Edit</button>
+                                    <button class="btn btn-sm btn-danger delete-user-btn" data-user-id="${u.id}" data-username="${u.username}">Delete</button>
+                                </td>
+                            </tr>`).join('');
+                        attachDeleteHandlers();
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="4" class="text-muted">No users found</td></tr>';
+                    }
+                } catch (err) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="text-danger">Error: ${err.message}</td></tr>`;
+                }
+            });
+
+            function attachDeleteHandlers() {
+                document.querySelectorAll('.delete-user-btn').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        if (!confirm(`Delete "${btn.dataset.username}"?`)) return;
+                        const res = await fetch('/admin/delete_user', {
+                            method: 'DELETE',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ user_id: btn.dataset.userId })
+                        });
+                        const data = await res.json();
+                        alert(data.msg);
+                        if (data.status === 'success') btn.closest('tr').remove();
+                    });
+                });
+            }
+
+            window.openEditUserModal = (id, username, full_name, office, email, role) => {
+                document.getElementById('editUserId').value = id;
+                document.getElementById('editUsername').value = username;
+                document.getElementById('editFullname').value = full_name;
+                document.getElementById('editOffice').value = office;
+                document.getElementById('editEmail').value = email;
+                document.getElementById('editRole').value = role ? role.charAt(0).toUpperCase() + role.slice(1).toLowerCase() : 'Employee';
+                new bootstrap.Modal(document.getElementById('editUserModal')).show();
+            };
+
+            document.getElementById('editUserForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const userId = document.getElementById('editUserId').value;
+                const res = await fetch(`/admin/update_user/${userId}`, { method: 'POST', body: new FormData(this) });
+                const data = await res.json();
+                alert(data.msg);
+                if (data.status === 'success') {
+                    bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+                    bootstrap.Modal.getInstance(document.getElementById('listUsersModal')).show();
+                }
+            });
+
+            function escapeHtml(value) {
+                return String(value ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+            }
+
+            function actionButtons(routeNumber) {
+                const updateBtn = canEditDocuments
+                    ? `<button type="button" class="btn btn-sm btn-success update-btn" data-route="${routeNumber}">Update</button>`
+                    : '';
+                return `${updateBtn}<button type="button" class="btn btn-sm btn-primary view-btn" data-route="${routeNumber}">History</button>`;
+            }
+
+            function buildDetailPanel(doc) {
+                const originDisplay = doc.origin === 'Others' && doc.other_office
+                    ? doc.other_office
+                    : (doc.origin || '-');
+                return `
+                    <div class="detail-grid">
+                        <div class="detail-item"><label>Document No.</label><span>${escapeHtml(doc.route_number)}</span></div>
+                        <div class="detail-item"><label>Date Received</label><span>${escapeHtml(doc.date_received || '-')}</span></div>
+                        <div class="detail-item"><label>Document Type</label><span>${escapeHtml(doc.doc_type || '-')}</span></div>
+                        <div class="detail-item"><label>Origin</label><span>${escapeHtml(originDisplay)}</span></div>
+                        <div class="detail-item"><label>${escapeHtml(doc.recipient_label || 'Forwarded To')}</label><span>${escapeHtml(doc.recipient || '-')}</span></div>
+                        <div class="detail-item"><label>Responsible Unit</label><span>${escapeHtml(doc.resp_unit || '-')}</span></div>
+                        <div class="detail-item"><label>Responsible Person</label><span>${escapeHtml(doc.responsible_person || '-')}</span></div>
+                        <div class="detail-item"><label>Action Needed</label><span>${escapeHtml(doc.action_needed || '-')}</span></div>
+                        <div class="detail-item"><label>Action Particulars</label><span>${escapeHtml(doc.action_particulars || '-')}</span></div>
+                        <div class="detail-item"><label>Action Provided</label><span>${escapeHtml(doc.action_provided || '-')}</span></div>
+                        <div class="detail-item" style="grid-column: 1 / -1;"><label>Subject</label><p>${escapeHtml(doc.subject || '-')}</p></div>
+                        <div class="detail-item" style="grid-column: 1 / -1;"><label>Remarks</label><p>${escapeHtml(doc.remarks || '-')}</p></div>
+                    </div>
+                    <div class="detail-actions">${actionButtons(doc.route_number)}</div>`;
+            }
+
+            function docSearchText(doc, extra = '') {
+                return `${doc.route_number} ${doc.date_received} ${doc.doc_type} ${doc.origin} ${doc.other_office || ''} ${doc.recipient} ${doc.subject} ${doc.status} ${doc.resp_unit} ${doc.responsible_person} ${doc.action_needed || ''} ${doc.action_particulars || ''} ${doc.action_provided || ''} ${doc.remarks || ''} ${extra}`.toLowerCase();
+            }
+
+            function toggleDesktopRow(row) {
+                const detailRow = row.nextElementSibling;
+                if (!detailRow?.classList.contains('detail-row')) return;
+                const expanded = row.classList.toggle('expanded');
+                detailRow.classList.toggle('d-none', !expanded);
+            }
+
+            function toggleMobileCard(card) {
+                card.classList.toggle('expanded');
+                const btn = card.querySelector('.expand-mobile-btn');
+                if (btn) {
+                    btn.textContent = card.classList.contains('expanded') ? 'Hide details' : 'View details';
+                }
+            }
+
+            function renderClassificationSection(docs, tableBodyId, mobileListId, emptyMessage, recipientColumnLabel) {
+                const tableBody = document.getElementById(tableBodyId);
+                const mobileList = document.getElementById(mobileListId);
+                tableBody.innerHTML = '';
+                mobileList.innerHTML = '';
+
+                if (!docs.length) {
+                    tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">${emptyMessage}</td></tr>`;
+                    mobileList.innerHTML = `<p class="text-muted text-center py-3 mb-0">${emptyMessage}</p>`;
+                    return;
+                }
+
+                docs.forEach(doc => {
+                    const searchText = docSearchText(doc, recipientColumnLabel);
+                    const recipientValue = doc.recipient || '-';
+
+                    const row = document.createElement('tr');
+                    row.className = 'doc-row';
+                    row.dataset.search = searchText;
+                    row.innerHTML = `
+                        <td><button type="button" class="expand-btn" aria-label="Expand row"><i class="bi bi-chevron-right"></i></button></td>
+                        <td>${escapeHtml(doc.route_number || '-')}</td>
+                        <td>${escapeHtml(doc.date_received || '-')}</td>
+                        <td>${escapeHtml(doc.doc_type || '-')}</td>
+                        <td>${escapeHtml(recipientColumnLabel === 'origin' ? (doc.origin || '-') : recipientValue)}</td>
+                        <td>${escapeHtml(doc.subject || '-')}</td>
+                        <td>${escapeHtml(doc.status || '-')}</td>`;
+
+                    const detailRow = document.createElement('tr');
+                    detailRow.className = 'detail-row d-none';
+                    detailRow.dataset.parentSearch = searchText;
+                    detailRow.innerHTML = `<td colspan="7"><div class="detail-panel">${buildDetailPanel(doc)}</div></td>`;
+
+                    row.addEventListener('click', e => {
+                        if (e.target.closest('.update-btn, .view-btn, .expand-btn')) {
+                            if (e.target.closest('.expand-btn')) toggleDesktopRow(row);
+                            return;
+                        }
+                        toggleDesktopRow(row);
+                    });
+
+                    tableBody.appendChild(row);
+                    tableBody.appendChild(detailRow);
+
+                    const card = document.createElement('div');
+                    card.className = 'doc-card';
+                    card.dataset.search = searchText;
+                    const summaryOrigin = recipientColumnLabel === 'origin'
+                        ? (doc.origin || '-')
+                        : `To: ${recipientValue}`;
+                    card.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="doc-num">${escapeHtml(doc.route_number || '-')}</div>
+                            <button type="button" class="btn btn-link expand-mobile-btn">View details</button>
+                        </div>
+                        <div class="doc-meta">${escapeHtml(doc.date_received || '-')} &middot; ${escapeHtml(doc.doc_type || '-')} &middot; ${escapeHtml(doc.status || '-')}</div>
+                        <div class="small">${escapeHtml(summaryOrigin)}</div>
+                        <div class="small mt-1">${escapeHtml(doc.subject || '-')}</div>
+                        <div class="detail-panel-mobile">${buildDetailPanel(doc)}</div>`;
+
+                    card.querySelector('.expand-mobile-btn').addEventListener('click', e => {
+                        e.stopPropagation();
+                        toggleMobileCard(card);
+                    });
+
+                    mobileList.appendChild(card);
+                });
+            }
+
+            function renderTodaySection(docs) {
+                sectionData.today = docs;
+                renderClassificationSection(
+                    docs,
+                    'todayTableBody',
+                    'todayMobile',
+                    'No active transactions for your office',
+                    'origin',
+                );
+            }
+
+            function renderInboundSection(docs) {
+                sectionData.inbound = docs;
+                renderClassificationSection(
+                    docs,
+                    'inboundTableBody',
+                    'inboundMobile',
+                    'No inbound documents found',
+                    'origin',
+                );
+            }
+
+            function renderOutboundSection(docs) {
+                sectionData.outbound = docs;
+                renderClassificationSection(
+                    docs,
+                    'outboundTableBody',
+                    'outboundMobile',
+                    'No outbound documents found',
+                    'recipient',
+                );
+            }
+
+            function filterSection(section, query) {
+                const normalized = query.trim().toLowerCase();
+                if (section === 'today' || section === 'inbound' || section === 'outbound') {
+                    document.querySelectorAll(`#${section}TableBody tr.doc-row`).forEach(row => {
+                        const haystack = row.dataset.search || '';
+                        const visible = !normalized || haystack.includes(normalized);
+                        row.style.display = visible ? '' : 'none';
+                        const detailRow = row.nextElementSibling;
+                        if (detailRow?.classList.contains('detail-row')) {
+                            if (!visible) {
+                                detailRow.classList.add('d-none');
+                                row.classList.remove('expanded');
+                            }
+                            detailRow.style.display = visible ? '' : 'none';
+                        }
+                    });
+                    document.querySelectorAll(`#${section}Mobile .doc-card`).forEach(card => {
+                        const haystack = card.dataset.search || card.textContent.toLowerCase();
+                        card.style.display = !normalized || haystack.includes(normalized) ? '' : 'none';
+                    });
+                }
+            }
+
+            async function loadDashboardStats() {
+                try {
+                    const res = await fetch('/get_dashboard_stats');
+                    const stats = await res.json();
+                    if (stats.error) return;
+                    document.getElementById('statToday').textContent = stats.today_transactions ?? 0;
+                    document.getElementById('statInbound').textContent = stats.inbound_total ?? 0;
+                    document.getElementById('statOutbound').textContent = stats.outbound_total ?? 0;
+                    document.getElementById('statPending').textContent = stats.pending_total ?? 0;
+                    document.getElementById('statCompleted').textContent = stats.completed_total ?? 0;
+                } catch (err) {
+                    console.error('Failed to load dashboard stats:', err);
+                }
+            }
+
+            async function loadDashboardSections() {
+                try {
+                    const [todayRes, inboundRes, outboundRes] = await Promise.all([
+                        fetch('/get_todays_docs'),
+                        fetch('/get_inbound_docs'),
+                        fetch('/get_outbound_docs'),
+                    ]);
+                    const [todayDocs, inboundDocs, outboundDocs] = await Promise.all([
+                        todayRes.json(),
+                        inboundRes.json(),
+                        outboundRes.json(),
+                    ]);
+                    if (Array.isArray(todayDocs)) renderTodaySection(todayDocs);
+                    if (Array.isArray(inboundDocs)) renderInboundSection(inboundDocs);
+                    if (Array.isArray(outboundDocs)) renderOutboundSection(outboundDocs);
+                } catch (err) {
+                    console.error('Failed to load dashboard documents:', err);
+                }
+            }
+
+            document.querySelectorAll('.section-filter').forEach(input => {
+                input.addEventListener('input', () => {
+                    filterSection(input.dataset.section, input.value);
+                });
+            });
+
+            document.addEventListener('click', e => {
+                if (e.target.classList.contains('view-btn')) {
+                    window.location.href = `/view_history/${e.target.getAttribute('data-route')}`;
+                }
+                const updateBtn = e.target.closest('.update-btn');
+                if (updateBtn) {
+                    window.location.href = `/update_document/${updateBtn.getAttribute('data-route')}`;
+                }
+            });
+
+            const welcomeDateEl = document.getElementById('welcomeDate');
+            if (welcomeDateEl) {
+                welcomeDateEl.textContent = new Intl.DateTimeFormat([], {
+                    timeZone: 'Asia/Manila',
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                }).format(new Date());
+            }
+
+            loadDashboardStats();
+            loadDashboardSections();
+        });
+    </script>
+</body>
+</html>

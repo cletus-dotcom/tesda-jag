@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+env/
+.env
+.env.local
+.env.*.local
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# App runtime
+uploads/
+*.backup
+*.log
+
+# Google credentials (use env vars on Vercel)
+credentials/
+service-account*.json
+
+# Local Excel / data exports
+*.tmp.xlsx
+
+# Vercel
+.vercel/

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}TESDA PTC-JAGNA DTS{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tesda-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app-navbar.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/tesda_logo.png') }}">
+    <style>
+        :root {
+            --tesda-blue: {{ tesda_blue }};
+            --tesda-blue-dark: {{ tesda_blue_dark }};
+            --tesda-blue-light: {{ tesda_blue_light }};
+        }
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .btn-tesda {
+            background-color: var(--tesda-blue);
+            border-color: var(--tesda-blue);
+            color: #fff;
+        }
+        .btn-tesda:hover {
+            background-color: var(--tesda-blue-dark);
+            border-color: var(--tesda-blue-dark);
+            color: #fff;
+        }
+        .text-tesda { color: var(--tesda-blue); }
+        .bg-tesda { background-color: var(--tesda-blue) !important; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="has-app-navbar{% if breadcrumbs is defined and breadcrumbs %} has-breadcrumbs{% endif %} {% block body_class %}{% endblock %}">
+    {% block navbar %}{% endblock %}
+    {% block body %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/brand-tagline-marquee.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

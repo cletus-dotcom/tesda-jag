@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}Document List — TESDA PTC-JAGNA{% endblock %}
+{% set breadcrumbs = [
+    {'label': 'Home', 'url': url_for('main_routes.index')},
+    {'label': 'Document Tracking', 'url': url_for('main_routes.dashboard')},
+    {'label': 'Document List'}
+] %}
+
+{% block navbar %}
+{% set navbar_title = 'Document List' %}
+{% include 'partials/app_navbar.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background: linear-gradient(165deg, #f8faff 0%, #e8eef8 100%); min-height: 100vh; }
+    .list-page { padding: 1rem 0.75rem 2rem; max-width: 1200px; margin: 0 auto; }
+    .list-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 51, 160, 0.1);
+        padding: 1.25rem;
+        border: 1px solid rgba(0, 51, 160, 0.08);
+    }
+    .list-card h3 { color: var(--tesda-blue); font-weight: 700; font-size: 1.25rem; }
+    .table th, .table td { font-size: 0.85rem; vertical-align: middle; }
+    th select { width: 100%; font-size: 0.75rem; }
+    .mobile-doc-card {
+        background: #f8faff;
+        border-radius: 10px;
+        padding: 0.85rem;
+        margin-bottom: 0.75rem;
+        border: 1px solid rgba(0, 51, 160, 0.08);
+        cursor: pointer;
+    }
+    .mobile-doc-card .doc-num { font-weight: 700; color: var(--tesda-blue); }
+    .desktop-table { display: none; }
+    .mobile-cards { display: block; }
+    @media (min-width: 992px) {
+        .desktop-table { display: block; }
+        .mobile-cards { display: none; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="list-page">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-2 mb-3">
+        <a href="{{ url_for('main_routes.dashboard') }}" class="btn btn-secondary btn-sm">&larr; Dashboard</a>
+        <a href="{{ url_for('main_routes.export_docs_pdf') }}" class="btn btn-tesda btn-sm">Export PDF</a>
+    </div>
+
+    <div class="list-card">
+        <h3 class="text-center mb-3">Document Tracking Records</h3>
+
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <div class="mobile-cards">
+            {% for doc in docs %}
+            <div class="mobile-doc-card" data-route="{{ doc.route_number }}" onclick="window.open('/view_history/{{ doc.route_number }}','_blank')">
+                <div class="doc-num">{{ doc.route_number }}</div>
+                <div class="small">{{ doc.classification or '-' }} &middot; {{ display_doc_type(doc.doc_type, doc.doc_type_part) }} &middot; {{ doc.status }}</div>
+                <div class="small text-muted">{{ doc.subject }}</div>
+                <div class="small mt-1">{{ doc.origin }} &rarr; {{ display_recipient(doc.forwarded_to, doc.forwarded_to_part, doc.classification) }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="desktop-table table-responsive">
+            <table id="docsTable" class="table table-bordered table-hover align-middle">
+                <thead class="bg-tesda text-white">
+                    <tr>
+                        <th>Doc No.</th>
+                        <th>Class</th>
+                        <th>Type</th>
+                        <th>Date Received</th>
+                        <th>Origin</th>
+                        <th>Subject</th>
+                        <th>Resp Unit</th>
+                        <th>Forwarded / Submitted To</th>
+                        <th>Status</th>
+                        {% if can_edit or is_admin %}<th>Actions</th>{% endif %}
+                    </tr>
+                    <tr class="bg-light">
+                        <th></th>
+                        {% set filter_attrs = [
+                            ('classification', 1), ('doc_type', 2), ('date_received', 3), ('origin', 4),
+                            ('subject', 5), ('resp_unit', 6), ('forwarded_to', 7), ('status', 8)
+                        ] %}
+                        {% for attr, col in filter_attrs %}
+                        <th>
+                            <select class="form-select form-select-sm filter-select" data-col="{{ col }}">
+                                <option value="">All</option>
+                                {% for val in docs|map(attribute=attr)|unique %}
+                                {% if attr == 'date_received' %}
+                                {% set val_fmt = val.strftime('%Y-%m-%d') if val else '' %}
+                                <option value="{{ val_fmt }}">{{ val_fmt }}</option>
+                                {% else %}
+                                <option value="{{ val }}">{{ val }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </th>
+                        {% endfor %}
+                        {% if can_edit or is_admin %}<th></th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in docs %}
+                    <tr class="clickable-row" data-route="{{ doc.route_number }}">
+                        <td>{{ doc.route_number }}</td>
+                        <td>{{ doc.classification or '' }}</td>
+                        <td>{{ display_doc_type(doc.doc_type, doc.doc_type_part) }}</td>
+                        <td>{{ doc.date_received.strftime('%Y-%m-%d') if doc.date_received else '' }}</td>
+                        <td>{{ doc.origin }}</td>
+                        <td>{{ doc.subject }}</td>
+                        <td>{{ doc.resp_unit }}</td>
+                        <td>{{ display_recipient(doc.forwarded_to, doc.forwarded_to_part, doc.classification) }}</td>
+                        <td>{{ doc.status }}</td>
+                        {% if can_edit or is_admin %}
+                        <td>
+                            {% if can_edit %}
+                            <a href="{{ url_for('main_routes.update_document', route_number=doc.route_number) }}"
+                                class="btn btn-sm btn-primary edit-btn">Edit</a>
+                            {% endif %}
+                            {% if is_admin %}
+                            <button class="btn btn-sm btn-danger delete-btn" data-route="{{ doc.route_number }}">Delete</button>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const table = document.getElementById('docsTable');
+        if (!table) return;
+
+        const selects = table.querySelectorAll('.filter-select');
+        const rows = table.querySelectorAll('tbody tr');
+        const isAdmin = {{ 'true' if is_admin else 'false' }};
+
+        selects.forEach(select => {
+            select.addEventListener('change', function() {
+                const colIndex = parseInt(this.dataset.col);
+                const filterValue = (this.value || '').trim().toLowerCase();
+                rows.forEach(row => {
+                    const cellText = (row.children[colIndex]?.textContent || '').trim().toLowerCase();
+                    row.style.display = (!filterValue || cellText === filterValue) ? '' : 'none';
+                });
+            });
+        });
+
+        rows.forEach(row => {
+            row.addEventListener('click', e => {
+                if (e.target.classList.contains('delete-btn') || e.target.classList.contains('edit-btn')) return;
+                const routeNum = row.dataset.route;
+                if (routeNum) window.open(`/view_history/${routeNum}`, '_blank');
+            });
+        });
+
+        if (isAdmin) {
+            table.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    const routeNum = btn.dataset.route;
+                    if (!confirm(`Delete route ${routeNum}?`)) return;
+                    fetch(`/delete_document/${routeNum}`, { method: 'POST' })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success) location.reload();
+                            else alert('Error: ' + data.message);
+                        });
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

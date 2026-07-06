@@ -1,0 +1,147 @@
+<div class="modal fade" id="listUsersModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-tesda text-white">
+                <h5 class="modal-title">Manage Users</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-end mb-3">
+                    <button class="btn btn-tesda" data-bs-toggle="modal" data-bs-target="#addUserModal">+ Add User</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle text-center">
+                        <thead class="table-dark">
+                            <tr><th>Username</th><th>Full Name</th><th>Role</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr><td colspan="4" class="text-muted">Loading users...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-tesda text-white">
+                <h5 class="modal-title">Edit User</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editUserForm">
+                <div class="modal-body">
+                    <input type="hidden" id="editUserId">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Username</label>
+                            <input type="text" id="editUsername" name="username" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Password (leave blank to keep)</label>
+                            <input type="password" id="editPassword" name="password" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" id="editFullname" name="full_name" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Office</label>
+                            <select id="editOffice" name="office" class="form-select">
+                                {% for dept in departments %}
+                                <option value="{{ dept }}">{{ dept }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="editEmail" name="email" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Role</label>
+                            <select id="editRole" name="role" class="form-select">
+                                {% for user_role in user_roles %}
+                                <option value="{{ user_role }}">{{ user_role }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-tesda">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% include 'add_edit_modals.html' %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const listUsersModal = document.getElementById('listUsersModal');
+        const tbody = document.getElementById('usersTableBody');
+
+        listUsersModal?.addEventListener('shown.bs.modal', async () => {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-muted">Loading...</td></tr>';
+            try {
+                const res = await fetch('/list_users');
+                const data = await res.json();
+                if (data.users?.length) {
+                    tbody.innerHTML = data.users.map(u => `
+                        <tr>
+                            <td>${u.username}</td>
+                            <td>${u.full_name || '-'}</td>
+                            <td>${u.role || '-'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-info" onclick="openEditUserModal('${u.id}','${u.username}','${u.full_name||''}','${u.office||''}','${u.email||''}','${u.role||''}')">Edit</button>
+                                <button class="btn btn-sm btn-danger delete-user-btn" data-user-id="${u.id}" data-username="${u.username}">Delete</button>
+                            </td>
+                        </tr>`).join('');
+                    document.querySelectorAll('.delete-user-btn').forEach(btn => {
+                        btn.addEventListener('click', async () => {
+                            if (!confirm(`Delete "${btn.dataset.username}"?`)) return;
+                            const res = await fetch('/admin/delete_user', {
+                                method: 'DELETE',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ user_id: btn.dataset.userId })
+                            });
+                            const data = await res.json();
+                            alert(data.msg);
+                            if (data.status === 'success') btn.closest('tr').remove();
+                        });
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-muted">No users found</td></tr>';
+                }
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-danger">Error: ${err.message}</td></tr>`;
+            }
+        });
+
+        window.openEditUserModal = (id, username, full_name, office, email, role) => {
+            document.getElementById('editUserId').value = id;
+            document.getElementById('editUsername').value = username;
+            document.getElementById('editFullname').value = full_name;
+            document.getElementById('editOffice').value = office;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editRole').value = role ? role.charAt(0).toUpperCase() + role.slice(1).toLowerCase() : 'Employee';
+            new bootstrap.Modal(document.getElementById('editUserModal')).show();
+        };
+
+        document.getElementById('editUserForm')?.addEventListener('submit', async e => {
+            e.preventDefault();
+            const userId = document.getElementById('editUserId').value;
+            const res = await fetch(`/admin/update_user/${userId}`, { method: 'POST', body: new FormData(e.target) });
+            const data = await res.json();
+            alert(data.msg);
+            if (data.status === 'success') {
+                bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+                bootstrap.Modal.getInstance(document.getElementById('listUsersModal')).show();
+            }
+        });
+    });
+</script>

@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+{% block title %}Add Document — TESDA PTC-JAGNA{% endblock %}
+{% set breadcrumbs = [
+    {'label': 'Home', 'url': url_for('main_routes.index')},
+    {'label': 'Document Tracking', 'url': url_for('main_routes.dashboard')},
+    {'label': 'Add Document'}
+] %}
+
+{% block navbar %}
+{% set navbar_title = 'Add Document' %}
+{% include 'partials/app_navbar.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background: linear-gradient(165deg, #f8faff 0%, #e8eef8 100%); min-height: 100vh; }
+    .form-page { padding: 1rem 0.75rem 2rem; max-width: 900px; margin: 0 auto; }
+    .form-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 51, 160, 0.1);
+        padding: 1.5rem;
+        border: 1px solid rgba(0, 51, 160, 0.08);
+    }
+    .form-card h4 { color: var(--tesda-blue); font-weight: 700; }
+    label { font-weight: 600; color: #334155; font-size: 0.875rem; }
+    .form-control, .form-select { border-radius: 8px; }
+    #otherOfficeField, #actionPartField, #docTypePartField, #recipientPartField { display: none; }
+    .actions-section-divider {
+        border: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--tesda-blue-dark) 0%, var(--tesda-blue) 55%, var(--tesda-blue-light) 100%);
+        border-radius: 3px;
+        margin: 0.75rem 0 1.25rem;
+        opacity: 1;
+    }
+    @media (min-width: 768px) { .form-page { padding: 1.5rem 1rem 2rem; } }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="form-page">
+    <div class="form-card">
+        <h4 class="mb-4"><i class="bi bi-file-earmark-plus"></i> Add New Document</h4>
+        <form method="POST" action="{{ url_for('main_routes.add_document') }}">
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <label>Classification</label>
+                    <select name="classification" id="classification" class="form-select" required>
+                        <option value="">-- Select --</option>
+                        {% for c in classifications %}
+                        <option>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-6 col-md-3">
+                    <label>Date</label>
+                    <input type="date" name="date_received" id="date_received" class="form-control" value="{{ default_date }}" required>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="fw-bold">Doc No.</label>
+                    <input type="text" id="preview_route" class="form-control bg-light" value="{{ preview_route }}" readonly>
+                </div>
+                <div class="col-6 col-md-3">
+                    <label>Document Type</label>
+                    <select name="doc_type" id="doc_type" class="form-select" required disabled>
+                        <option value="">-- Select classification first --</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-6" id="docTypePartField">
+                    <label>Specify Document Type</label>
+                    <input type="text" name="doc_type_part" class="form-control" placeholder="Enter document type">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label>Status</label>
+                    <select name="status" class="form-select">
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label>Origin</label>
+                    <select name="origin" id="origin" class="form-select" required>
+                        <option value="">-- Select Origin --</option>
+                        {% for origin in origins %}
+                        <option>{{ origin }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-6" id="otherOfficeField">
+                    <label>Other Office</label>
+                    <input type="text" name="other_office" class="form-control" placeholder="Specify if Others">
+                </div>
+                <div class="col-12">
+                    <label>Subject</label>
+                    <textarea name="subject" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="col-12"><hr class="actions-section-divider"></div>
+                <div class="col-12 col-md-4">
+                    <label>Action Needed</label>
+                    <select name="action_needed" id="action_needed" class="form-select" required disabled>
+                        <option value="">-- Select classification first --</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-4" id="actionPartField">
+                    <label>Specify Action Needed</label>
+                    <input type="text" name="action_part" class="form-control" placeholder="Enter action needed">
+                </div>
+                <div class="col-12">
+                    <label>Action Particulars</label>
+                    <textarea name="action_particulars" class="form-control" rows="2" placeholder="Additional details or instructions for the action needed"></textarea>
+                </div>
+                <div class="col-12 col-md-4">
+                    <label>Responsible Person</label>
+                    <input type="text" name="responsible_person" class="form-control">
+                </div>
+                <div class="col-12 col-md-4">
+                    <label>Responsible Unit</label>
+                    <select name="resp_unit" class="form-select" required>
+                        <option value="">-- Select --</option>
+                        {% for unit in resp_units %}
+                        <option>{{ unit }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-4">
+                    <label id="recipientLabel">Forwarded To</label>
+                    <select name="forwarded_to" id="forwarded_to" class="form-select" disabled>
+                        <option value="">-- Select classification first --</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-4" id="recipientPartField">
+                    <label id="recipientPartLabel">Specify Forwarded To</label>
+                    <input type="text" name="forwarded_to_part" class="form-control" placeholder="Enter recipient">
+                </div>
+                <div class="col-12 col-md-4">
+                    <label>Action Provided</label>
+                    <input type="text" name="action_provided" class="form-control">
+                </div>
+                <div class="col-12">
+                    <label>Remarks / Notes</label>
+                    <textarea name="remarks" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="mt-4 d-flex flex-column flex-sm-row gap-2 justify-content-end">
+                <a href="{{ url_for('main_routes.dashboard') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-tesda"><i class="bi bi-save"></i> Save Document</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const docTypesByClassification = {
+        Inbound: {{ document_types_inbound | tojson }},
+        Outbound: {{ document_types_outbound | tojson }}
+    };
+    const actionsByClassification = {
+        Inbound: {{ actions_needed_inbound | tojson }},
+        Outbound: {{ actions_needed_outbound | tojson }}
+    };
+    const outboundDefaultOrigin = {{ outbound_default_origin | tojson }};
+    const recipientsByClassification = {
+        Inbound: {{ forwarded_to_options | tojson }},
+        Outbound: {{ submitted_to_options | tojson }}
+    };
+    const recipientLabels = {
+        Inbound: 'Forwarded To',
+        Outbound: 'Submitted To'
+    };
+    const recipientPartLabels = {
+        Inbound: 'Specify Forwarded To',
+        Outbound: 'Specify Submitted To'
+    };
+
+    function updateDocTypeOptions(selectedType = '') {
+        const classificationSelect = document.getElementById('classification');
+        const docTypeSelect = document.getElementById('doc_type');
+        const docTypePartField = document.getElementById('docTypePartField');
+        const classification = classificationSelect.value;
+        const types = docTypesByClassification[classification] || [];
+
+        docTypeSelect.innerHTML = classification
+            ? '<option value="">-- Select --</option>'
+            : '<option value="">-- Select classification first --</option>';
+
+        types.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type;
+            option.textContent = type;
+            if (type === selectedType) option.selected = true;
+            docTypeSelect.appendChild(option);
+        });
+
+        docTypeSelect.disabled = !classification;
+        toggleDocTypePart();
+    }
+
+    function toggleDocTypePart() {
+        const docTypeSelect = document.getElementById('doc_type');
+        const docTypePartField = document.getElementById('docTypePartField');
+        const docTypePartInput = docTypePartField.querySelector('input[name="doc_type_part"]');
+        const show = docTypeSelect.value === 'Others';
+        docTypePartField.style.display = show ? 'block' : 'none';
+        if (!show && docTypePartInput) docTypePartInput.value = '';
+    }
+
+    function updateActionOptions(selectedAction = '') {
+        const classificationSelect = document.getElementById('classification');
+        const actionSelect = document.getElementById('action_needed');
+        const classification = classificationSelect.value;
+        const actions = actionsByClassification[classification] || [];
+
+        actionSelect.innerHTML = classification
+            ? '<option value="">-- Select --</option>'
+            : '<option value="">-- Select classification first --</option>';
+
+        actions.forEach(action => {
+            const option = document.createElement('option');
+            option.value = action;
+            option.textContent = action;
+            if (action === selectedAction) option.selected = true;
+            actionSelect.appendChild(option);
+        });
+
+        actionSelect.disabled = !classification;
+        toggleActionPart();
+    }
+
+    function toggleActionPart() {
+        const actionSelect = document.getElementById('action_needed');
+        const actionPartField = document.getElementById('actionPartField');
+        const actionPartInput = actionPartField.querySelector('input[name="action_part"]');
+        const show = actionSelect.value === 'Others';
+        actionPartField.style.display = show ? 'block' : 'none';
+        if (!show && actionPartInput) actionPartInput.value = '';
+    }
+
+    function toggleOtherOffice() {
+        const originSelect = document.getElementById('origin');
+        const otherOfficeField = document.getElementById('otherOfficeField');
+        if (originSelect.disabled) {
+            otherOfficeField.style.display = 'none';
+            return;
+        }
+        otherOfficeField.style.display = originSelect.value === 'Others' ? 'block' : 'none';
+    }
+
+    function updateOriginForClassification() {
+        const classificationSelect = document.getElementById('classification');
+        const originSelect = document.getElementById('origin');
+        const otherOfficeField = document.getElementById('otherOfficeField');
+        const otherOfficeInput = otherOfficeField.querySelector('input[name="other_office"]');
+
+        if (classificationSelect.value === 'Outbound') {
+            originSelect.value = outboundDefaultOrigin;
+            originSelect.disabled = true;
+            originSelect.classList.add('bg-light');
+            otherOfficeField.style.display = 'none';
+            if (otherOfficeInput) otherOfficeInput.value = '';
+        } else {
+            originSelect.disabled = false;
+            originSelect.classList.remove('bg-light');
+            if (originSelect.value === outboundDefaultOrigin) {
+                originSelect.value = '';
+            }
+            toggleOtherOffice();
+        }
+    }
+
+    function updateRecipientOptions(selectedValue = '') {
+        const classificationSelect = document.getElementById('classification');
+        const recipientSelect = document.getElementById('forwarded_to');
+        const recipientLabel = document.getElementById('recipientLabel');
+        const recipientPartLabel = document.getElementById('recipientPartLabel');
+        const classification = classificationSelect.value;
+        const options = recipientsByClassification[classification] || [];
+
+        recipientLabel.textContent = recipientLabels[classification] || 'Forwarded To';
+        recipientPartLabel.textContent = recipientPartLabels[classification] || 'Specify Forwarded To';
+
+        recipientSelect.innerHTML = classification
+            ? '<option value="">-- Select --</option>'
+            : '<option value="">-- Select classification first --</option>';
+
+        options.forEach(option => {
+            const el = document.createElement('option');
+            el.value = option;
+            el.textContent = option;
+            if (option === selectedValue) el.selected = true;
+            recipientSelect.appendChild(el);
+        });
+
+        recipientSelect.disabled = !classification;
+        toggleRecipientPart();
+    }
+
+    function toggleRecipientPart() {
+        const recipientSelect = document.getElementById('forwarded_to');
+        const recipientPartField = document.getElementById('recipientPartField');
+        const recipientPartInput = recipientPartField.querySelector('input[name="forwarded_to_part"]');
+        const show = recipientSelect.value === 'Others';
+        recipientPartField.style.display = show ? 'block' : 'none';
+        if (!show && recipientPartInput) recipientPartInput.value = '';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const originSelect = document.getElementById('origin');
+        const actionNeeded = document.getElementById('action_needed');
+        const classificationSelect = document.getElementById('classification');
+        const docTypeSelect = document.getElementById('doc_type');
+        const recipientSelect = document.getElementById('forwarded_to');
+        const dateInput = document.getElementById('date_received');
+        const previewRouteInput = document.getElementById('preview_route');
+        const form = document.querySelector('form');
+
+        async function updatePreviewRoute() {
+            const date = dateInput.value;
+            if (!date) {
+                previewRouteInput.value = '';
+                return;
+            }
+            try {
+                const response = await fetch(`{{ url_for('main_routes.preview_route_number') }}?date=${encodeURIComponent(date)}`);
+                const data = await response.json();
+                if (response.ok) {
+                    previewRouteInput.value = data.route_number;
+                } else {
+                    previewRouteInput.value = '';
+                }
+            } catch (error) {
+                previewRouteInput.value = '';
+            }
+        }
+
+        classificationSelect.addEventListener('change', () => {
+            updateDocTypeOptions('');
+            updateActionOptions('');
+            updateOriginForClassification();
+            updateRecipientOptions('');
+        });
+        docTypeSelect.addEventListener('change', toggleDocTypePart);
+        actionNeeded.addEventListener('change', toggleActionPart);
+        recipientSelect.addEventListener('change', toggleRecipientPart);
+        dateInput.addEventListener('change', updatePreviewRoute);
+        originSelect.addEventListener('change', toggleOtherOffice);
+        form?.addEventListener('submit', () => {
+            originSelect.disabled = false;
+        });
+        updateDocTypeOptions('');
+        updateActionOptions('');
+        updateOriginForClassification();
+        updateRecipientOptions('');
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block title %}Department Codes — TESDA PTC-JAGNA{% endblock %}
+{% set breadcrumbs = [
+    {'label': 'Home', 'url': url_for('main_routes.index')},
+    {'label': 'Document Tracking', 'url': url_for('main_routes.dashboard')},
+    {'label': 'Manage Departments'}
+] %}
+
+{% block navbar %}
+{% set navbar_title = 'Manage Departments' %}
+{% include 'partials/app_navbar.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background: linear-gradient(165deg, #f8faff 0%, #e8eef8 100%); min-height: 100vh; }
+    .dept-page { padding: 1rem 0.75rem 2rem; max-width: 900px; margin: 0 auto; }
+    .dept-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 51, 160, 0.1);
+        padding: 1.25rem;
+        border: 1px solid rgba(0, 51, 160, 0.08);
+    }
+    .dept-card h3 { color: var(--tesda-blue); font-weight: 700; }
+    .dept-card .table td { vertical-align: middle; }
+    .dept-view.hidden { display: none; }
+    .dept-edit.hidden { display: none; }
+    .dept-row.editing { background: #f8faff; }
+    #deptAlert { display: none; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="dept-page">
+    <button class="btn btn-secondary mb-3" onclick="window.location.href='{{ url_for('main_routes.dashboard') }}'">
+        &larr; Back to Dashboard
+    </button>
+
+    <div class="dept-card">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-2 mb-3">
+            <div>
+                <h3 class="mb-1">Department Reference Codes</h3>
+                <p class="text-muted small mb-0">Edit department names and codes used across users, responsible units, and forwarded-to options.</p>
+            </div>
+        </div>
+
+        <div id="deptAlert" class="alert" role="alert"></div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle" id="deptTable">
+                <thead class="bg-tesda text-white">
+                    <tr>
+                        <th style="width: 70px;">ID</th>
+                        <th>Department Name</th>
+                        <th style="width: 140px;">Code</th>
+                        <th style="width: 180px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in departments %}
+                    <tr class="dept-row" data-id="{{ d.id }}">
+                        <td>{{ d.id }}</td>
+                        <td>
+                            <span class="dept-view dept-name-view">{{ d.dept_name }}</span>
+                            <input type="text" class="form-control form-control-sm dept-edit dept-name-input hidden" value="{{ d.dept_name }}">
+                        </td>
+                        <td>
+                            <span class="dept-view dept-code-view">{{ d.dept_code }}</span>
+                            <input type="text" class="form-control form-control-sm dept-edit dept-code-input hidden" value="{{ d.dept_code }}">
+                        </td>
+                        <td>
+                            <div class="dept-view d-flex gap-1">
+                                <button type="button" class="btn btn-primary btn-sm edit-btn">Edit</button>
+                                <button type="button" class="btn btn-danger btn-sm delete-btn">Delete</button>
+                            </div>
+                            <div class="dept-edit hidden d-flex gap-1">
+                                <button type="button" class="btn btn-success btn-sm save-btn">Save</button>
+                                <button type="button" class="btn btn-secondary btn-sm cancel-btn">Cancel</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <hr>
+        <h5 class="mt-3">Add New Department</h5>
+        <div class="row g-2 mt-2">
+            <div class="col-12 col-md-6">
+                <input id="newName" type="text" class="form-control" placeholder="Department Name">
+            </div>
+            <div class="col-6 col-md-3">
+                <input id="newCode" type="text" class="form-control" placeholder="Dept Code">
+            </div>
+            <div class="col-6 col-md-3">
+                <button class="btn btn-tesda w-100" id="addBtn" type="button">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const deptAlert = document.getElementById('deptAlert');
+
+    function showAlert(message, type = 'success') {
+        deptAlert.className = `alert alert-${type}`;
+        deptAlert.textContent = message;
+        deptAlert.style.display = 'block';
+    }
+
+    function setRowEditing(row, editing) {
+        row.classList.toggle('editing', editing);
+        row.querySelectorAll('.dept-view').forEach(el => el.classList.toggle('hidden', editing));
+        row.querySelectorAll('.dept-edit').forEach(el => el.classList.toggle('hidden', !editing));
+    }
+
+    function resetRow(row) {
+        row.querySelector('.dept-name-input').value = row.querySelector('.dept-name-view').textContent.trim();
+        row.querySelector('.dept-code-input').value = row.querySelector('.dept-code-view').textContent.trim();
+        setRowEditing(row, false);
+    }
+
+    function rowPayload(row) {
+        return {
+            dept_name: row.querySelector('.dept-name-input').value.trim(),
+            dept_code: row.querySelector('.dept-code-input').value.trim(),
+        };
+    }
+
+    document.querySelectorAll('.dept-row').forEach(row => {
+        row.querySelector('.edit-btn').addEventListener('click', () => {
+            document.querySelectorAll('.dept-row.editing').forEach(resetRow);
+            setRowEditing(row, true);
+            row.querySelector('.dept-name-input').focus();
+        });
+
+        row.querySelector('.cancel-btn').addEventListener('click', () => resetRow(row));
+
+        row.querySelector('.save-btn').addEventListener('click', async () => {
+            const id = row.dataset.id;
+            const payload = rowPayload(row);
+            try {
+                const response = await fetch(`/dept_ref/update/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const data = await response.json();
+                if (!data.success) {
+                    showAlert(data.message || 'Update failed.', 'danger');
+                    return;
+                }
+                row.querySelector('.dept-name-view').textContent = data.department.dept_name;
+                row.querySelector('.dept-code-view').textContent = data.department.dept_code;
+                row.querySelector('.dept-name-input').value = data.department.dept_name;
+                row.querySelector('.dept-code-input').value = data.department.dept_code;
+                setRowEditing(row, false);
+                showAlert(data.message, 'success');
+            } catch (error) {
+                showAlert('Unable to save department.', 'danger');
+            }
+        });
+
+        row.querySelector('.delete-btn').addEventListener('click', async () => {
+            const id = row.dataset.id;
+            const name = row.querySelector('.dept-name-view').textContent.trim();
+            if (!confirm(`Delete department "${name}"?`)) return;
+            try {
+                const response = await fetch(`/dept_ref/delete/${id}`, { method: 'DELETE' });
+                const data = await response.json();
+                if (!data.success) {
+                    showAlert(data.message || 'Delete failed.', 'danger');
+                    return;
+                }
+                row.remove();
+                showAlert(data.message, 'success');
+            } catch (error) {
+                showAlert('Unable to delete department.', 'danger');
+            }
+        });
+    });
+
+    document.getElementById('addBtn').addEventListener('click', async () => {
+        const dept_name = document.getElementById('newName').value.trim();
+        const dept_code = document.getElementById('newCode').value.trim();
+        try {
+            const response = await fetch('/dept_ref/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ dept_name, dept_code }),
+            });
+            const data = await response.json();
+            if (!data.success) {
+                showAlert(data.message || 'Add failed.', 'danger');
+                return;
+            }
+            showAlert(data.message, 'success');
+            window.location.reload();
+        } catch (error) {
+            showAlert('Unable to add department.', 'danger');
+        }
+    });
+</script>
+{% endblock %}

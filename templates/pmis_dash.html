@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P.M.I.S. — TESDA PTC-JAGNA</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tesda-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app-navbar.css') }}">
+    <style>
+        :root {
+            --tesda-blue: #0033A0;
+            --tesda-blue-dark: #002080;
+            --tesda-blue-light: #1a56c4;
+            --sidebar-width: 250px;
+            --topbar-height: var(--app-chrome-offset);
+        }
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            background: #eef2f8;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--topbar-height);
+            background: #fff;
+            border-bottom: 1px solid rgba(0, 51, 160, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            z-index: 2000;
+        }
+        .btn-menu {
+            border: none;
+            background: transparent;
+            font-size: 1.4rem;
+            color: var(--tesda-blue);
+            margin-right: 0.75rem;
+        }
+        .topbar-title {
+            font-weight: 700;
+            color: var(--tesda-blue);
+        }
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-left: auto;
+        }
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: #475569;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--tesda-blue);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        .sidebar {
+            position: fixed;
+            top: var(--topbar-height);
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--tesda-blue-dark) 0%, var(--tesda-blue) 100%);
+            color: #fff;
+            transform: translateX(-100%);
+            transition: transform 0.25s ease;
+            z-index: 1900;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem 0;
+        }
+        body.sidebar-open .sidebar { transform: translateX(0); }
+        body.sidebar-open::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            z-index: 1800;
+        }
+        .sidebar-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            opacity: 0.65;
+            padding: 0.5rem 1.25rem 0.35rem;
+            margin: 0;
+        }
+        .sidebar-nav { list-style: none; padding: 0; margin: 0; }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.7rem 1.25rem;
+            color: rgba(255, 255, 255, 0.92);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .sidebar-nav a:hover, .sidebar-nav a.active {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 1.25rem 1.25rem 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            text-align: center;
+        }
+        .sidebar-logo {
+            width: 72px;
+            max-width: 80px;
+            opacity: 0.85;
+            object-fit: contain;
+        }
+        .sidebar-subtext {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.72);
+            margin-top: 0.5rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+        .main-content {
+            margin-top: var(--topbar-height);
+            padding: 1rem;
+            min-height: calc(100vh - var(--topbar-height));
+        }
+        .dashboard-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px rgba(0, 51, 160, 0.08);
+            border: 1px solid rgba(0, 51, 160, 0.08);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .welcome-card h4 { color: var(--tesda-blue); font-weight: 700; margin-bottom: 0.35rem; }
+        .welcome-card p { color: #64748b; margin-bottom: 0.75rem; }
+        .welcome-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.25rem;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+        .dev-notice {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+        }
+        .dev-notice .dev-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: #fff8e1;
+            color: #f59e0b;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.25rem;
+        }
+        .dev-notice h5 {
+            color: var(--tesda-blue);
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+        .dev-notice p {
+            color: #64748b;
+            max-width: 480px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        @media (min-width: 992px) {
+            body.sidebar-open::before { display: none; }
+            .sidebar { transform: translateX(0); }
+            .main-content { margin-left: var(--sidebar-width); padding: 1.5rem; }
+            .btn-menu { display: none; }
+        }
+    </style>
+</head>
+<body class="has-app-navbar has-breadcrumbs dashboard-layout">
+    {% set breadcrumbs = [
+        {'label': 'Home', 'url': url_for('main_routes.index')},
+        {'label': 'Property Inventory', 'url': url_for('pmis_routes.dashboard')},
+        {'label': 'Dashboard'}
+    ] %}
+    {% set navbar_title = 'P.M.I.S.' %}
+    {% set navbar_menu_toggle = true %}
+    {% include 'partials/app_navbar.html' %}
+
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-body">
+            <p class="sidebar-label">Property</p>
+            <ul class="sidebar-nav">
+                <li><a href="{{ url_for('pmis_routes.dashboard') }}" class="active"><i class="bi bi-box-seam"></i> PMIS Dashboard</a></li>
+                <li><a href="{{ url_for('main_routes.dashboard') }}"><i class="bi bi-speedometer2"></i> Document Tracker</a></li>
+                <li><a href="{{ url_for('rmt_routes.dashboard') }}"><i class="bi bi-archive"></i> Records Management</a></li>
+                <li><a href="{{ url_for('main_routes.index') }}"><i class="bi bi-house"></i> Home</a></li>
+                {% if not is_portal_admin_role(session.get('role')) %}
+                <li><a href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal"><i class="bi bi-key"></i> Change Password</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('main_routes.logout') }}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            <img src="{{ url_for('static', filename='images/tesda_logo.png') }}" alt="TESDA" class="sidebar-logo">
+            <div class="sidebar-subtext">TESDA PTC-Jagna</div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="dashboard-card welcome-card">
+            <h4>Welcome, {{ fullname }}!</h4>
+            <p>Property Monitoring &amp; Inventory System</p>
+            <div class="welcome-meta">
+                <span><i class="bi bi-building"></i> {{ office }}</span>
+                <span><i class="bi bi-person-badge"></i> {{ role }}</span>
+                <span><i class="bi bi-calendar3"></i> <span id="welcomeDate">—</span></span>
+            </div>
+        </div>
+
+        <div class="dashboard-card dev-notice">
+            <div class="dev-icon"><i class="bi bi-tools"></i></div>
+            <h5>This function is on development stage.</h5>
+            <p>Some details will be designed soon.</p>
+        </div>
+    </main>
+
+    {% if not is_portal_admin_role(session.get('role')) %}
+    {% include 'partials/change_password_modal.html' %}
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/brand-tagline-marquee.js') }}"></script>
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', () => {
+            document.body.classList.toggle('sidebar-open');
+        });
+        document.body.addEventListener('click', (e) => {
+            if (document.body.classList.contains('sidebar-open')
+                && !e.target.closest('.sidebar')
+                && !e.target.closest('.btn-menu')) {
+                document.body.classList.remove('sidebar-open');
+            }
+        });
+
+        const now = new Date();
+        document.getElementById('welcomeDate').textContent = now.toLocaleDateString('en-PH', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        });
+    </script>
+</body>
+</html>

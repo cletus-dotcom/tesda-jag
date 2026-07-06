@@ -1,0 +1,11 @@
+Flask==3.1.2
+flask-cors==6.0.1
+Flask-SQLAlchemy==3.1.1
+psycopg2-binary==2.9.11
+python-dotenv==1.2.1
+pytz==2025.2
+reportlab==4.4.5
+waitress==3.0.2
+google-api-python-client==2.187.0
+google-auth==2.41.1
+openpyxl==3.1.5

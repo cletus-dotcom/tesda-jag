@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Records Management — TESDA PTC-JAGNA</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tesda-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app-navbar.css') }}">
+    <style>
+        :root {
+            --tesda-blue: #0033A0;
+            --tesda-blue-dark: #002080;
+            --tesda-blue-light: #1a56c4;
+            --sidebar-width: 250px;
+            --topbar-height: var(--app-chrome-offset);
+        }
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            background: #eef2f8;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--topbar-height);
+            background: #fff;
+            border-bottom: 1px solid rgba(0, 51, 160, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            z-index: 2000;
+        }
+        .btn-menu {
+            border: none;
+            background: transparent;
+            font-size: 1.4rem;
+            color: var(--tesda-blue);
+            margin-right: 0.75rem;
+        }
+        .topbar-title {
+            font-weight: 700;
+            color: var(--tesda-blue);
+        }
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .btn-new-record {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: var(--tesda-blue);
+            color: #fff;
+            border-radius: 8px;
+            padding: 0.45rem 0.85rem;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .btn-new-record:hover { color: #fff; background: var(--tesda-blue-dark); }
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: #475569;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--tesda-blue);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        .sidebar {
+            position: fixed;
+            top: var(--topbar-height);
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--tesda-blue-dark) 0%, var(--tesda-blue) 100%);
+            color: #fff;
+            transform: translateX(-100%);
+            transition: transform 0.25s ease;
+            z-index: 1900;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem 0;
+        }
+        body.sidebar-open .sidebar { transform: translateX(0); }
+        body.sidebar-open::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            z-index: 1800;
+        }
+        .sidebar-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            opacity: 0.65;
+            padding: 0.5rem 1.25rem 0.35rem;
+            margin: 0;
+        }
+        .sidebar-nav { list-style: none; padding: 0; margin: 0; }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.7rem 1.25rem;
+            color: rgba(255, 255, 255, 0.92);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .sidebar-nav a:hover, .sidebar-nav a.active {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 1.25rem 1.25rem 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            text-align: center;
+        }
+        .sidebar-logo {
+            width: 72px;
+            max-width: 80px;
+            opacity: 0.85;
+            object-fit: contain;
+        }
+        .sidebar-subtext {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.72);
+            margin-top: 0.5rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+        .main-content {
+            margin-top: var(--topbar-height);
+            padding: 1rem;
+            min-height: calc(100vh - var(--topbar-height));
+        }
+        .dashboard-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px rgba(0, 51, 160, 0.08);
+            border: 1px solid rgba(0, 51, 160, 0.08);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .welcome-card h4 { color: var(--tesda-blue); font-weight: 700; margin-bottom: 0.35rem; }
+        .welcome-card p { color: #64748b; margin-bottom: 0.75rem; }
+        .welcome-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.25rem;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+        .stat-tile {
+            background: #f8faff;
+            border-radius: 10px;
+            padding: 0.85rem;
+            text-align: center;
+            border: 1px solid rgba(0, 51, 160, 0.08);
+        }
+        .stat-value { font-size: 1.35rem; font-weight: 800; color: var(--tesda-blue); }
+        .stat-label { font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; }
+        .section-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .section-header h5 {
+            font-weight: 700;
+            color: var(--tesda-blue);
+            margin: 0;
+        }
+        .section-subtitle { font-size: 0.82rem; color: #64748b; margin: 0.2rem 0 0; }
+        .section-search { position: relative; max-width: 320px; width: 100%; }
+        .section-search .form-control {
+            padding-left: 2.1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+        .section-search i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+        }
+        .section-table-wrap {
+            max-height: 420px;
+            overflow: auto;
+            border: 1px solid rgba(0, 51, 160, 0.08);
+            border-radius: 10px;
+        }
+        .section-table { margin-bottom: 0; font-size: 0.85rem; }
+        .section-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: var(--tesda-blue);
+            color: #fff;
+            white-space: nowrap;
+        }
+        .doc-row { cursor: pointer; }
+        .doc-row.expanded { background: #f8faff; }
+        .expand-btn {
+            color: var(--tesda-blue);
+            padding: 0;
+            border: none;
+            background: transparent;
+        }
+        .expand-btn i { transition: transform 0.2s ease; }
+        .doc-row.expanded .expand-btn i { transform: rotate(90deg); }
+        .detail-row td { background: #f8faff; padding: 0; border-top: none; }
+        .detail-panel { padding: 1rem 1.25rem 1.1rem; border-top: 2px solid rgba(0, 51, 160, 0.12); }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.85rem 1rem;
+        }
+        .detail-item label {
+            display: block;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #64748b;
+            margin-bottom: 0.15rem;
+        }
+        .detail-item span, .detail-item p, .detail-item a {
+            display: block;
+            font-size: 0.85rem;
+            margin: 0;
+            color: #1e293b;
+            word-break: break-word;
+        }
+        .detail-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+        .section-mobile-list { display: block; }
+        .section-desktop-table { display: none; }
+        .doc-card {
+            background: #f8faff;
+            border: 1px solid rgba(0, 51, 160, 0.1);
+            border-radius: 10px;
+            padding: 0.85rem;
+            margin-bottom: 0.75rem;
+        }
+        .doc-card .doc-num { font-weight: 700; color: var(--tesda-blue); }
+        .doc-card .doc-meta { font-size: 0.78rem; color: #64748b; }
+        .doc-card .detail-panel-mobile { display: none; margin-top: 0.75rem; }
+        .doc-card.expanded .detail-panel-mobile { display: block; }
+        .doc-card .expand-mobile-btn {
+            font-size: 0.78rem;
+            padding: 0;
+            text-decoration: none;
+        }
+        .drive-badge {
+            display: inline-block;
+            font-size: 0.72rem;
+            padding: 0.15rem 0.45rem;
+            border-radius: 999px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-weight: 600;
+        }
+        @media (min-width: 768px) {
+            .section-header { flex-direction: row; align-items: center; justify-content: space-between; }
+            .section-mobile-list { display: none; }
+            .section-desktop-table { display: block; }
+            .main-content { padding: 1.5rem; }
+        }
+        @media (min-width: 992px) {
+            body.sidebar-open::before { display: none; }
+            .sidebar { transform: translateX(0); }
+            .main-content { margin-left: var(--sidebar-width); }
+            .btn-menu { display: none; }
+        }
+    </style>
+</head>
+<body class="has-app-navbar has-breadcrumbs dashboard-layout">
+    {% if can_edit %}
+    {% set navbar_extra %}<a href="{{ url_for('rmt_routes.add_record') }}" class="app-topbar-action"><i class="bi bi-plus-circle"></i> New Record</a>{% endset %}
+    {% endif %}
+    {% set breadcrumbs = [
+        {'label': 'Home', 'url': url_for('main_routes.index')},
+        {'label': 'Records Management', 'url': url_for('rmt_routes.dashboard')},
+        {'label': 'Dashboard'}
+    ] %}
+    {% set navbar_title = 'Records Management' %}
+    {% set navbar_menu_toggle = true %}
+    {% include 'partials/app_navbar.html' %}
+
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-body">
+            <p class="sidebar-label">Records</p>
+            <ul class="sidebar-nav">
+                <li><a href="{{ url_for('rmt_routes.dashboard') }}" class="active"><i class="bi bi-archive"></i> RMT Dashboard</a></li>
+                <li><a href="{{ url_for('pmis_routes.dashboard') }}"><i class="bi bi-box-seam"></i> P.M.I.S.</a></li>
+                <li><a href="{{ url_for('main_routes.dashboard') }}"><i class="bi bi-speedometer2"></i> Document Tracker</a></li>
+                <li><a href="{{ url_for('main_routes.index') }}"><i class="bi bi-house"></i> Home</a></li>
+                {% if not is_portal_admin_role(session.get('role')) %}
+                <li><a href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal"><i class="bi bi-key"></i> Change Password</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('main_routes.logout') }}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            <img src="{{ url_for('static', filename='images/tesda_logo.png') }}" alt="TESDA" class="sidebar-logo">
+            <div class="sidebar-subtext">TESDA PTC-Jagna</div>
+            {% if drive_configured %}
+            <div class="drive-badge mt-2">Google Drive connected</div>
+            {% endif %}
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="dashboard-card welcome-card">
+            <h4>Welcome, {{ fullname }}!</h4>
+            <p>Records Management Tool — scanned PDF records with cabinet and shelf locations</p>
+            <div class="welcome-meta">
+                <span><i class="bi bi-building"></i> {{ office }}</span>
+                <span><i class="bi bi-person-badge"></i> {{ role }}</span>
+                <span><i class="bi bi-calendar3"></i> <span id="welcomeDate">—</span></span>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <h5 class="text-tesda fw-bold mb-3">Record Statistics</h5>
+            <div class="stats-grid">
+                <div class="stat-tile">
+                    <div class="stat-value" id="statTotal">—</div>
+                    <div class="stat-label">Total Records</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="stat-value" id="statCabinets">—</div>
+                    <div class="stat-label">Cabinets Used</div>
+                </div>
+                <div class="stat-tile">
+                    <div class="stat-value" id="statWithPdf">—</div>
+                    <div class="stat-label">With PDF</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card section-card">
+            <div class="section-header">
+                <div>
+                    <h5><i class="bi bi-table"></i> Center Records</h5>
+                    <p class="section-subtitle">Search records by title, type, cabinet, shelf, or keywords</p>
+                </div>
+                <div class="section-search">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="recordsFilter" class="form-control" placeholder="Search records...">
+                </div>
+            </div>
+            <div class="section-mobile-list" id="recordsMobile"></div>
+            <div class="section-desktop-table section-table-wrap">
+                <table class="table table-hover section-table mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 36px;"></th>
+                            <th>Record #</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Title</th>
+                            <th>Cabinet</th>
+                            <th>Shelf</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    {% if not is_portal_admin_role(session.get('role')) %}
+    {% include 'partials/change_password_modal.html' %}
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/brand-tagline-marquee.js') }}"></script>
+    <script>
+        const canEditRecords = {{ 'true' if can_edit else 'false' }};
+        const isAdmin = {{ 'true' if is_admin_role(role) else 'false' }};
+
+        document.getElementById('menuToggle').addEventListener('click', () => {
+            document.body.classList.toggle('sidebar-open');
+        });
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function recordSearchText(record) {
+            return `${record.record_number} ${record.record_date} ${record.record_type} ${record.title} ${record.cabinet_number} ${record.shelf_number} ${record.keywords || ''} ${record.remarks || ''} ${record.encoded_by || ''}`.toLowerCase();
+        }
+
+        function actionButtons(record) {
+            const editBtn = canEditRecords
+                ? `<a href="/rmt/edit/${record.id}" class="btn btn-sm btn-success">Update</a>`
+                : '';
+            const deleteBtn = isAdmin
+                ? `<button type="button" class="btn btn-sm btn-danger delete-btn" data-id="${record.id}">Delete</button>`
+                : '';
+            return `${editBtn}${deleteBtn}`;
+        }
+
+        function pdfLinkHtml(record) {
+            if (!record.pdf_link) return '<span>-</span>';
+            return `<a href="${escapeHtml(record.pdf_link)}" target="_blank" rel="noopener">Open PDF in Google Drive / storage</a>`;
+        }
+
+        function buildDetailPanel(record) {
+            return `
+                <div class="detail-grid">
+                    <div class="detail-item"><label>Record No.</label><span>${escapeHtml(record.record_number)}</span></div>
+                    <div class="detail-item"><label>Record Date</label><span>${escapeHtml(record.record_date || '-')}</span></div>
+                    <div class="detail-item"><label>Record Type</label><span>${escapeHtml(record.record_type || '-')}</span></div>
+                    <div class="detail-item"><label>Cabinet</label><span>${escapeHtml(record.cabinet_number || '-')}</span></div>
+                    <div class="detail-item"><label>Shelf</label><span>${escapeHtml(record.shelf_number || '-')}</span></div>
+                    <div class="detail-item"><label>Encoded By</label><span>${escapeHtml(record.encoded_by || '-')}</span></div>
+                    <div class="detail-item"><label>Date Encoded</label><span>${escapeHtml(record.date_encoded || '-')}</span></div>
+                    <div class="detail-item"><label>PDF Link</label>${pdfLinkHtml(record)}</div>
+                    <div class="detail-item" style="grid-column: 1 / -1;"><label>Title</label><p>${escapeHtml(record.title || '-')}</p></div>
+                    <div class="detail-item" style="grid-column: 1 / -1;"><label>Keywords</label><p>${escapeHtml(record.keywords || '-')}</p></div>
+                    <div class="detail-item" style="grid-column: 1 / -1;"><label>Remarks</label><p>${escapeHtml(record.remarks || '-')}</p></div>
+                </div>
+                <div class="detail-actions">${actionButtons(record)}</div>`;
+        }
+
+        function toggleDesktopRow(row) {
+            const detailRow = row.nextElementSibling;
+            if (!detailRow?.classList.contains('detail-row')) return;
+            const expanded = row.classList.toggle('expanded');
+            detailRow.classList.toggle('d-none', !expanded);
+        }
+
+        function toggleMobileCard(card) {
+            card.classList.toggle('expanded');
+            const btn = card.querySelector('.expand-mobile-btn');
+            if (btn) btn.textContent = card.classList.contains('expanded') ? 'Hide details' : 'View details';
+        }
+
+        function renderRecords(records) {
+            const tableBody = document.getElementById('recordsTableBody');
+            const mobileList = document.getElementById('recordsMobile');
+            tableBody.innerHTML = '';
+            mobileList.innerHTML = '';
+
+            if (!records.length) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No records found</td></tr>';
+                mobileList.innerHTML = '<p class="text-muted text-center py-3 mb-0">No records found</p>';
+                return;
+            }
+
+            records.forEach(record => {
+                const searchText = recordSearchText(record);
+                const row = document.createElement('tr');
+                row.className = 'doc-row';
+                row.dataset.search = searchText;
+                row.innerHTML = `
+                    <td><button type="button" class="expand-btn" aria-label="Expand row"><i class="bi bi-chevron-right"></i></button></td>
+                    <td>${escapeHtml(record.record_number || '-')}</td>
+                    <td>${escapeHtml(record.record_date || '-')}</td>
+                    <td>${escapeHtml(record.record_type || '-')}</td>
+                    <td>${escapeHtml(record.title || '-')}</td>
+                    <td>${escapeHtml(record.cabinet_number || '-')}</td>
+                    <td>${escapeHtml(record.shelf_number || '-')}</td>`;
+
+                const detailRow = document.createElement('tr');
+                detailRow.className = 'detail-row d-none';
+                detailRow.innerHTML = `<td colspan="7"><div class="detail-panel">${buildDetailPanel(record)}</div></td>`;
+
+                row.addEventListener('click', e => {
+                    if (e.target.closest('.update-btn, .delete-btn, .expand-btn, a')) {
+                        if (e.target.closest('.expand-btn')) toggleDesktopRow(row);
+                        return;
+                    }
+                    toggleDesktopRow(row);
+                });
+
+                tableBody.appendChild(row);
+                tableBody.appendChild(detailRow);
+
+                const card = document.createElement('div');
+                card.className = 'doc-card';
+                card.dataset.search = searchText;
+                card.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="doc-num">${escapeHtml(record.record_number || '-')}</div>
+                        <button type="button" class="btn btn-link expand-mobile-btn">View details</button>
+                    </div>
+                    <div class="doc-meta">${escapeHtml(record.record_date || '-')} · ${escapeHtml(record.record_type || '-')} · Cabinet ${escapeHtml(record.cabinet_number || '-')} / Shelf ${escapeHtml(record.shelf_number || '-')}</div>
+                    <div class="small mt-1">${escapeHtml(record.title || '-')}</div>
+                    <div class="detail-panel-mobile">${buildDetailPanel(record)}</div>`;
+                card.querySelector('.expand-mobile-btn').addEventListener('click', e => {
+                    e.stopPropagation();
+                    toggleMobileCard(card);
+                });
+                mobileList.appendChild(card);
+            });
+        }
+
+        function filterRecords(query) {
+            const normalized = query.trim().toLowerCase();
+            document.querySelectorAll('#recordsTableBody tr.doc-row').forEach(row => {
+                const visible = !normalized || (row.dataset.search || '').includes(normalized);
+                row.style.display = visible ? '' : 'none';
+                const detailRow = row.nextElementSibling;
+                if (detailRow?.classList.contains('detail-row')) {
+                    if (!visible) {
+                        detailRow.classList.add('d-none');
+                        row.classList.remove('expanded');
+                    }
+                    detailRow.style.display = visible ? '' : 'none';
+                }
+            });
+            document.querySelectorAll('#recordsMobile .doc-card').forEach(card => {
+                const haystack = card.dataset.search || card.textContent.toLowerCase();
+                card.style.display = !normalized || haystack.includes(normalized) ? '' : 'none';
+            });
+        }
+
+        async function loadStats() {
+            const res = await fetch('/rmt/get_stats');
+            const stats = await res.json();
+            if (stats.error) return;
+            document.getElementById('statTotal').textContent = stats.total_records ?? 0;
+            document.getElementById('statCabinets').textContent = stats.total_cabinets ?? 0;
+            document.getElementById('statWithPdf').textContent = stats.with_pdf ?? 0;
+        }
+
+        async function loadRecords() {
+            const res = await fetch('/rmt/get_records');
+            const records = await res.json();
+            if (Array.isArray(records)) renderRecords(records);
+        }
+
+        document.getElementById('recordsFilter').addEventListener('input', e => {
+            filterRecords(e.target.value);
+        });
+
+        document.addEventListener('click', async e => {
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (!deleteBtn) return;
+            if (!confirm('Delete this record permanently?')) return;
+            const res = await fetch(`/rmt/delete/${deleteBtn.dataset.id}`, { method: 'POST' });
+            const data = await res.json();
+            alert(data.msg);
+            if (data.status === 'success') {
+                loadStats();
+                loadRecords();
+            }
+        });
+
+        const welcomeDateEl = document.getElementById('welcomeDate');
+        if (welcomeDateEl) {
+            welcomeDateEl.textContent = new Intl.DateTimeFormat([], {
+                timeZone: 'Asia/Manila',
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            }).format(new Date());
+        }
+
+        loadStats();
+        loadRecords();
+    </script>
+</body>
+</html>

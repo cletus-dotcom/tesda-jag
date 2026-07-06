@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Add Record — Records Management{% endblock %}
+{% set breadcrumbs = [
+    {'label': 'Home', 'url': url_for('main_routes.index')},
+    {'label': 'Records Management', 'url': url_for('rmt_routes.dashboard')},
+    {'label': 'Add Record'}
+] %}
+
+{% block navbar %}
+{% set navbar_title = 'Add Record' %}
+{% include 'partials/app_navbar.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background: linear-gradient(165deg, #f8faff 0%, #e8eef8 100%); min-height: 100vh; }
+    .form-page { padding: 1rem 0.75rem 2rem; max-width: 900px; margin: 0 auto; }
+    .form-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 51, 160, 0.1);
+        padding: 1.5rem;
+        border: 1px solid rgba(0, 51, 160, 0.08);
+    }
+    .form-card h4 { color: var(--tesda-blue); font-weight: 700; }
+    label { font-weight: 600; color: #334155; font-size: 0.875rem; }
+    .form-control, .form-select { border-radius: 8px; }
+    #recordTypePartField { display: none; }
+    .drive-note {
+        font-size: 0.82rem;
+        color: #64748b;
+        margin-top: 0.35rem;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="form-page">
+    <div class="form-card">
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-4">
+            <h4 class="mb-0"><i class="bi bi-file-earmark-arrow-up"></i> Add Record</h4>
+            <a href="{{ url_for('rmt_routes.dashboard') }}" class="btn btn-outline-secondary btn-sm">Back to RMT</a>
+        </div>
+
+        <form method="POST" action="{{ url_for('rmt_routes.add_record') }}" enctype="multipart/form-data">
+            <div class="row g-3">
+                <div class="col-6 col-md-4">
+                    <label>Record Date</label>
+                    <input type="date" name="record_date" id="record_date" class="form-control" value="{{ default_date }}" required>
+                </div>
+                <div class="col-6 col-md-8">
+                    <label class="fw-bold">Record No.</label>
+                    <input type="text" id="preview_record_number" class="form-control bg-light" value="{{ preview_number }}" readonly>
+                </div>
+                <div class="col-12">
+                    <label>Title</label>
+                    <input type="text" name="title" class="form-control" maxlength="220" required placeholder="Record title or description">
+                </div>
+                <div class="col-6 col-md-4">
+                    <label>Record Type</label>
+                    <select name="record_type" id="record_type" class="form-select" required>
+                        <option value="">-- Select --</option>
+                        {% for item in rmt_record_types %}
+                        <option>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-8" id="recordTypePartField">
+                    <label>Specify Record Type</label>
+                    <input type="text" name="record_type_part" class="form-control" placeholder="Enter record type">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label>Cabinet No.</label>
+                    <input type="text" name="cabinet_number" class="form-control" required placeholder="e.g. 01">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label>Shelf No.</label>
+                    <input type="text" name="shelf_number" class="form-control" required placeholder="e.g. A-3">
+                </div>
+                <div class="col-12 col-md-6">
+                    <label>Keywords</label>
+                    <input type="text" name="keywords" class="form-control" placeholder="Search keywords (comma-separated)">
+                </div>
+                <div class="col-12">
+                    <label>Upload PDF</label>
+                    <input type="file" name="pdf_file" class="form-control" accept="application/pdf,.pdf">
+                    {% if drive_configured %}
+                    <p class="drive-note mb-0">PDF will be uploaded to Google Drive when saved.</p>
+                    {% else %}
+                    <p class="drive-note mb-0">PDF will be stored locally. Configure Google Drive in .env to upload automatically.</p>
+                    {% endif %}
+                </div>
+                <div class="col-12">
+                    <label>Google Drive Link <span class="text-muted fw-normal">(optional if uploading file)</span></label>
+                    <input type="url" name="pdf_link" class="form-control" placeholder="https://drive.google.com/...">
+                </div>
+                <div class="col-12">
+                    <label>Remarks</label>
+                    <textarea name="remarks" class="form-control" rows="3" placeholder="Additional notes"></textarea>
+                </div>
+            </div>
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-tesda">Save Record</button>
+                <a href="{{ url_for('rmt_routes.dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const recordType = document.getElementById('record_type');
+    const recordTypePartField = document.getElementById('recordTypePartField');
+    const recordDate = document.getElementById('record_date');
+    const previewNumber = document.getElementById('preview_record_number');
+
+    function toggleRecordTypePart() {
+        const show = recordType.value === 'Others';
+        recordTypePartField.style.display = show ? 'block' : 'none';
+    }
+
+    async function refreshPreviewNumber() {
+        if (!recordDate.value) return;
+        const res = await fetch(`/rmt/preview_record_number?date=${encodeURIComponent(recordDate.value)}`);
+        const data = await res.json();
+        if (data.record_number) previewNumber.value = data.record_number;
+    }
+
+    recordType.addEventListener('change', toggleRecordTypePart);
+    recordDate.addEventListener('change', refreshPreviewNumber);
+    toggleRecordTypePart();
+</script>
+{% endblock %}

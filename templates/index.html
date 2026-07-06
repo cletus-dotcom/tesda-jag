@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% block title %}TESDA PTC-JAGNA Apps Portal{% endblock %}
+{% block body_class %}landing-body{% endblock %}
+
+{% block navbar %}
+{% set navbar_show_landing_links = true %}
+{% set navbar_show_landing_login = true %}
+{% set landing_nav_active = 'home' %}
+{% include 'partials/app_navbar.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="portal">
+
+    <header class="hero-banner">
+        <div class="portal-hero-inner">
+            <div class="hero-brand">
+                <div class="logo-wrap">
+                    <img src="{{ url_for('static', filename='images/tesda_logo.png') }}" alt="TESDA Logo">
+                </div>
+            </div>
+            <h1 class="portal-title">TESDA PTC-JAGNA Apps Portal</h1>
+            <p class="portal-tagline">&ldquo;Building Careers, Growing Economies.&rdquo;</p>
+            <p class="portal-location">
+                <i class="bi bi-geo-alt-fill"></i>
+                <span>
+                    Located in Poblacion, Jagna&mdash;the Gateway to Mindanao. Since 1997, PTC-Jagna has been Bohol&rsquo;s hub for technical-vocational excellence. We offer industry-aligned programs to equip you with the skills needed for today&rsquo;s labor market. Join us in building a more employable and innovative workforce for the community and beyond.
+                </span>
+            </p>
+        </div>
+    </header>
+
+    <section class="portal-section" id="modules">
+        <div class="module-hub-inner">
+            <div class="portal-section-header">
+                <p class="section-subtitle">Central Hub</p>
+                <h2 class="section-title">Select a Module</h2>
+            </div>
+            <div class="module-grid">
+
+                <article class="module-card" id="card-dts">
+                    <div class="module-card-header">
+                        <div class="module-icon glow">
+                            <i class="bi bi-folder2-open"></i>
+                        </div>
+                        <div>
+                            <h2>Document Tracking System (DTS)</h2>
+                            <p class="module-tagline">&ldquo;No document left behind. Trace files in real-time.&rdquo;</p>
+                        </div>
+                    </div>
+                    <div class="metric-chips">
+                        <span class="metric-chip"><i class="bi bi-inbox"></i> <span id="dtsInbound">—</span> New Inbound Docs</span>
+                        <span class="metric-chip"><i class="bi bi-hourglass-split"></i> <span id="dtsPending">—</span> Pending Approvals</span>
+                    </div>
+                    <a href="{{ url_for('main_routes.login', next='/dashboard') }}" class="module-action">
+                        Track &amp; Route Documents <i class="bi bi-arrow-right"></i>
+                    </a>
+                </article>
+
+                <article class="module-card" id="card-rmt">
+                    <div class="module-card-header">
+                        <div class="module-icon">
+                            <i class="bi bi-shield-lock"></i>
+                        </div>
+                        <div>
+                            <h2>Records Management Tool (RMT)</h2>
+                            <p class="module-tagline">&ldquo;The digital vault for PTC-Jagna&rsquo;s institutional memory.&rdquo;</p>
+                        </div>
+                    </div>
+                    <div class="metric-chips">
+                        <span class="metric-chip"><i class="bi bi-mortarboard"></i> <span id="rmtProfiles">—</span> Active Student Profiles</span>
+                        <span class="metric-chip"><i class="bi bi-journal-text"></i> <span id="rmtBatches">—</span> Graduating Class Batches Saved</span>
+                    </div>
+                    <a href="{{ url_for('main_routes.login', next='/rmt/dashboard') }}" class="module-action">
+                        Access Archive Vault <i class="bi bi-arrow-right"></i>
+                    </a>
+                </article>
+
+                <article class="module-card pmis-dev" id="card-pmis">
+                    <div class="module-card-header">
+                        <div class="module-icon">
+                            <i class="bi bi-upc-scan"></i>
+                        </div>
+                        <div>
+                            <h2>Property Monitoring &amp; Inventory System (PMIS)</h2>
+                            <p class="module-tagline">&ldquo;Accountability at a glance. Managing our physical assets efficiently.&rdquo;</p>
+                        </div>
+                    </div>
+                    <div class="metric-chips">
+                        <span class="metric-chip"><i class="bi bi-tools"></i> <span id="pmisCheckedOut">—</span> Tech-Voc Equipment Checked Out</span>
+                        <span class="metric-chip warn"><i class="bi bi-exclamation-triangle"></i> <span id="pmisAlerts">—</span> Maintenance Alerts</span>
+                        <span class="metric-chip muted" id="pmisDevNote">In development</span>
+                    </div>
+                    <a href="{{ url_for('main_routes.login', next='/pmis/dashboard') }}" class="module-action">
+                        Audit Assets &amp; Tools <i class="bi bi-arrow-right"></i>
+                    </a>
+                </article>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="jagna-pulse">
+        <div class="pulse-inner">
+            <div class="pulse-header">
+                <span class="live-dot"></span>
+                <h3>The Jagna Pulse</h3>
+            </div>
+            <div class="pulse-grid">
+                <div class="pulse-search-wrap">
+                    <label for="globalSearch">Quick Search</label>
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="search" id="globalSearch" placeholder="Search across documents, records, or property ID..." autocomplete="off">
+                        <div class="search-results" id="searchResults"></div>
+                    </div>
+                </div>
+                <div class="pulse-timeline-wrap">
+                    <label>Recent Actions</label>
+                    <div class="timeline-scroll">
+                        <div class="timeline-track" id="timelineTrack"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="landing-footer">
+        &copy; {{ 2026 }} TESDA Provincial Training Center &ndash; Jagna. All rights reserved.
+    </footer>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const moduleLabels = { dts: "Document Tracking", rmt: "Records Management", pmis: "Property Inventory" };
+
+    async function loadPulse() {
+        try {
+            const res = await fetch("/portal/pulse");
+            const data = await res.json();
+            if (data.error) return;
+
+            document.getElementById("dtsInbound").textContent = data.dts.new_inbound;
+            document.getElementById("dtsPending").textContent = data.dts.pending_approvals;
+            document.getElementById("rmtProfiles").textContent = data.rmt.active_profiles;
+            document.getElementById("rmtBatches").textContent = data.rmt.class_batches;
+            document.getElementById("pmisCheckedOut").textContent = data.pmis.equipment_checked_out;
+            document.getElementById("pmisAlerts").textContent = data.pmis.maintenance_alerts;
+
+            const track = document.getElementById("timelineTrack");
+            const items = data.recent_actions || [];
+            const doubled = items.concat(items);
+            track.innerHTML = doubled.map(item => `
+                <div class="timeline-item">
+                    <span class="dot"></span>
+                    <div>
+                        ${item.text}
+                        ${item.time ? `<span class="time">${item.time}</span>` : ""}
+                    </div>
+                </div>
+            `).join("");
+        } catch (e) {
+            console.warn("Could not load portal pulse", e);
+        }
+    }
+
+    let searchTimer;
+    const searchInput = document.getElementById("globalSearch");
+    const searchResults = document.getElementById("searchResults");
+
+    searchInput.addEventListener("input", () => {
+        clearTimeout(searchTimer);
+        const q = searchInput.value.trim();
+        if (q.length < 2) {
+            searchResults.classList.remove("visible");
+            searchResults.innerHTML = "";
+            return;
+        }
+        searchTimer = setTimeout(async () => {
+            try {
+                const res = await fetch(`/portal/search?q=${encodeURIComponent(q)}`);
+                const data = await res.json();
+                const results = data.results || [];
+                if (!results.length) {
+                    searchResults.innerHTML = `<div class="search-result-item"><span class="result-detail">No matches found. Sign in to add or manage records.</span></div>`;
+                } else {
+                    searchResults.innerHTML = results.map(r => `
+                        <a href="${r.login_url}" class="search-result-item">
+                            <div class="result-module">${moduleLabels[r.module] || r.module}</div>
+                            <div class="result-label">${r.label}</div>
+                            <div class="result-detail">${r.detail || "Sign in to view details"}</div>
+                        </a>
+                    `).join("");
+                }
+                searchResults.classList.add("visible");
+            } catch (e) {
+                searchResults.classList.remove("visible");
+            }
+        }, 280);
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest(".pulse-search-wrap")) {
+            searchResults.classList.remove("visible");
+        }
+    });
+
+    searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const first = searchResults.querySelector(".search-result-item[href]");
+            if (first) first.click();
+        }
+    });
+
+    loadPulse();
+</script>
+{% endblock %}

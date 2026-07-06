@@ -1,0 +1,315 @@
+/* Shared app navbar — TBGP layout, TESDA palette */
+
+:root {
+    --app-topbar-height: 3.75rem;
+    --app-chrome-offset: var(--app-topbar-height);
+}
+
+body.has-breadcrumbs {
+    --app-topbar-height: 4.65rem;
+}
+
+body.has-app-navbar {
+    padding-top: var(--app-topbar-height);
+}
+
+body.has-app-navbar.dashboard-layout {
+    padding-top: 0;
+}
+
+.app-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1300;
+    min-height: var(--app-topbar-height);
+    background: #000000;
+    border-bottom: 2px solid var(--tesda-blue-light);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+}
+
+.app-topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+    min-width: 0;
+}
+
+.app-topbar-main {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.app-btn-menu {
+    flex-shrink: 0;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    color: #fff;
+    font-size: 1.35rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 2px;
+    line-height: 1;
+}
+
+.app-btn-menu:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: #fff;
+    color: #fff;
+}
+
+.app-brand-block {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.app-brand-mark {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: #fff !important;
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.app-brand-logo {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.app-brand-name {
+    line-height: 1;
+}
+
+.app-brand-sep {
+    color: rgba(255, 255, 255, 0.35);
+    font-weight: 300;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.app-brand-tagline {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 8px, #000 calc(100% - 8px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 8px, #000 calc(100% - 8px), transparent 100%);
+}
+
+.app-brand-tagline-track {
+    display: inline-flex;
+    width: max-content;
+    white-space: nowrap;
+    animation: appTaglineMarquee var(--marquee-duration, 28s) linear infinite;
+}
+
+.app-brand-tagline-item {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-style: italic;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.62);
+    line-height: 1.2;
+}
+
+@keyframes appTaglineMarquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(var(--marquee-distance, -100%)); }
+}
+
+.app-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.app-topbar-extra {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.app-topbar-pagehead {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.12rem;
+    text-align: right;
+    min-width: 0;
+    max-width: min(46vw, 320px);
+}
+
+.app-topbar-title {
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.92);
+    white-space: nowrap;
+    line-height: 1.15;
+}
+
+.app-topbar-links {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.app-topbar-link {
+    color: rgba(255, 255, 255, 0.62) !important;
+    font-weight: 500;
+    font-size: 0.82rem;
+    padding: 0.35rem 0.65rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.app-topbar-link:hover,
+.app-topbar-link.active {
+    color: var(--tesda-blue-light) !important;
+}
+
+.app-btn-login {
+    background: var(--tesda-blue);
+    color: #fff !important;
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 2px;
+    padding: 0.4rem 1rem;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.app-btn-login:hover {
+    background: var(--tesda-blue-light);
+    color: #fff !important;
+    box-shadow: 0 0 14px rgba(26, 86, 196, 0.35);
+}
+
+.app-topbar-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: var(--tesda-blue);
+    color: #fff !important;
+    border: none;
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.75rem;
+    border-radius: 2px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.app-topbar-action:hover {
+    background: var(--tesda-blue-light);
+    color: #fff !important;
+}
+
+/* Breadcrumbs — inline under page title in navbar */
+.app-topbar-pagehead .app-breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.15rem 0.3rem;
+    font-size: 0.62rem;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+}
+
+.app-topbar-pagehead .app-breadcrumbs a {
+    color: rgba(255, 255, 255, 0.68);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.app-topbar-pagehead .app-breadcrumbs a:hover {
+    color: var(--tesda-blue-light);
+    text-decoration: underline;
+}
+
+.app-topbar-pagehead .app-breadcrumbs .current {
+    color: rgba(255, 255, 255, 0.48);
+    font-weight: 500;
+}
+
+.app-topbar-pagehead .app-breadcrumbs .sep {
+    color: rgba(255, 255, 255, 0.32);
+    user-select: none;
+}
+
+@media (max-width: 767px) {
+    .app-brand-tagline {
+        display: none;
+    }
+
+    .app-brand-sep {
+        display: none;
+    }
+
+    .app-topbar-pagehead {
+        max-width: min(52vw, 200px);
+    }
+
+    .app-topbar-title {
+        font-size: 0.78rem;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .app-topbar-pagehead .app-breadcrumbs {
+        font-size: 0.58rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .app-topbar-action .label {
+        display: none;
+    }
+
+    .app-topbar-pagehead .app-breadcrumbs {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-brand-tagline-track {
+        animation: none !important;
+    }
+
+    .app-brand-tagline-item[aria-hidden="true"] {
+        display: none;
+    }
+}

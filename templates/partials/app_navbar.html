@@ -1,0 +1,47 @@
+<header class="app-topbar">
+    <div class="app-topbar-inner">
+        <div class="app-topbar-main">
+            {% if navbar_menu_toggle|default(false) %}
+            <button class="app-btn-menu" id="{{ navbar_menu_id|default('menuToggle') }}" type="button" aria-label="Toggle menu">
+                <i class="bi bi-list"></i>
+            </button>
+            {% endif %}
+            <div class="app-brand-block">
+                <a class="app-brand-mark" href="{{ url_for('main_routes.index') }}">
+                    <img src="{{ url_for('static', filename='images/tesda_logo.png') }}" alt="TESDA" class="app-brand-logo">
+                    <span class="app-brand-name">PTC-JAGNA</span>
+                </a>
+                <span class="app-brand-sep" aria-hidden="true">|</span>
+                <div class="app-brand-tagline" aria-label="Building Careers, Growing Economies">
+                    <div class="app-brand-tagline-track">
+                        <span class="app-brand-tagline-item">Building Careers, Growing Economies.</span>
+                        <span class="app-brand-tagline-item" aria-hidden="true">Building Careers, Growing Economies.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="app-topbar-right">
+            {% if navbar_show_landing_links|default(false) %}
+            <nav class="app-topbar-links d-none d-md-flex" aria-label="Portal navigation">
+                <a href="{{ url_for('main_routes.index') }}" class="app-topbar-link{% if landing_nav_active == 'home' %} active{% endif %}">Home</a>
+                <a href="{{ url_for('main_routes.index') }}#modules" class="app-topbar-link">Modules</a>
+            </nav>
+            {% endif %}
+            {% if navbar_extra is defined and navbar_extra %}
+            <div class="app-topbar-extra">{{ navbar_extra | safe }}</div>
+            {% endif %}
+            {% if navbar_show_landing_login|default(false) %}
+            <div class="app-topbar-pagehead">
+                <a href="{{ url_for('main_routes.login') }}" class="app-btn-login">Login</a>
+            </div>
+            {% elif navbar_title is defined and navbar_title %}
+            <div class="app-topbar-pagehead">
+                <span class="app-topbar-title">{{ navbar_title }}</span>
+                {% if breadcrumbs is defined and breadcrumbs %}
+                {% include 'partials/breadcrumbs.html' %}
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</header>

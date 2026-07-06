@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Edit Record — Records Management{% endblock %}
+{% set breadcrumbs = [
+    {'label': 'Home', 'url': url_for('main_routes.index')},
+    {'label': 'Records Management', 'url': url_for('rmt_routes.dashboard')},
+    {'label': 'Edit Record'}
+] %}
+
+{% block navbar %}
+{% set navbar_title = 'Edit Record' %}
+{% include 'partials/app_navbar.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background: linear-gradient(165deg, #f8faff 0%, #e8eef8 100%); min-height: 100vh; }
+    .form-page { padding: 1rem 0.75rem 2rem; max-width: 900px; margin: 0 auto; }
+    .form-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 51, 160, 0.1);
+        padding: 1.5rem;
+        border: 1px solid rgba(0, 51, 160, 0.08);
+    }
+    .form-card h4 { color: var(--tesda-blue); font-weight: 700; }
+    label { font-weight: 600; color: #334155; font-size: 0.875rem; }
+    .form-control, .form-select { border-radius: 8px; }
+    #recordTypePartField { display: none; }
+    .drive-note { font-size: 0.82rem; color: #64748b; margin-top: 0.35rem; }
+    .current-link { font-size: 0.85rem; word-break: break-all; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="form-page">
+    <div class="form-card">
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-4">
+            <h4 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Record</h4>
+            <a href="{{ url_for('rmt_routes.dashboard') }}" class="btn btn-outline-secondary btn-sm">Back to RMT</a>
+        </div>
+
+        <form method="POST" action="{{ url_for('rmt_routes.edit_record', record_id=record.id) }}" enctype="multipart/form-data">
+            <div class="row g-3">
+                <div class="col-6 col-md-4">
+                    <label>Record Date</label>
+                    <input type="date" name="record_date" class="form-control"
+                        value="{{ record.record_date.strftime('%Y-%m-%d') if record.record_date else '' }}" required>
+                </div>
+                <div class="col-6 col-md-8">
+                    <label class="fw-bold">Record No.</label>
+                    <input type="text" class="form-control bg-light" value="{{ record.record_number }}" readonly>
+                </div>
+                <div class="col-12">
+                    <label>Title</label>
+                    <input type="text" name="title" class="form-control" maxlength="220" required value="{{ record.title }}">
+                </div>
+                <div class="col-6 col-md-4">
+                    <label>Record Type</label>
+                    <select name="record_type" id="record_type" class="form-select" required>
+                        <option value="">-- Select --</option>
+                        {% for item in rmt_record_types %}
+                        <option {% if record.record_type == item %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-8" id="recordTypePartField">
+                    <label>Specify Record Type</label>
+                    <input type="text" name="record_type_part" class="form-control"
+                        value="{{ record.record_type_part or '' }}" placeholder="Enter record type">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label>Cabinet No.</label>
+                    <input type="text" name="cabinet_number" class="form-control" required value="{{ record.cabinet_number }}">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label>Shelf No.</label>
+                    <input type="text" name="shelf_number" class="form-control" required value="{{ record.shelf_number }}">
+                </div>
+                <div class="col-12 col-md-6">
+                    <label>Keywords</label>
+                    <input type="text" name="keywords" class="form-control" value="{{ record.keywords or '' }}">
+                </div>
+                {% if record.pdf_link %}
+                <div class="col-12">
+                    <label>Current PDF Link</label>
+                    <div class="current-link">
+                        <a href="{{ record.pdf_link }}" target="_blank" rel="noopener">{{ record.pdf_link }}</a>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="col-12">
+                    <label>Replace PDF</label>
+                    <input type="file" name="pdf_file" class="form-control" accept="application/pdf,.pdf">
+                    {% if drive_configured %}
+                    <p class="drive-note mb-0">New PDF will be uploaded to Google Drive when saved.</p>
+                    {% else %}
+                    <p class="drive-note mb-0">Leave blank to keep the current file.</p>
+                    {% endif %}
+                </div>
+                <div class="col-12">
+                    <label>Google Drive Link</label>
+                    <input type="url" name="pdf_link" class="form-control" value="{{ record.pdf_link or '' }}" placeholder="https://drive.google.com/...">
+                </div>
+                <div class="col-12">
+                    <label>Remarks</label>
+                    <textarea name="remarks" class="form-control" rows="3">{{ record.remarks or '' }}</textarea>
+                </div>
+            </div>
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-tesda">Update Record</button>
+                <a href="{{ url_for('rmt_routes.dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const recordType = document.getElementById('record_type');
+    const recordTypePartField = document.getElementById('recordTypePartField');
+
+    function toggleRecordTypePart() {
+        const show = recordType.value === 'Others';
+        recordTypePartField.style.display = show ? 'block' : 'none';
+    }
+
+    recordType.addEventListener('change', toggleRecordTypePart);
+    toggleRecordTypePart();
+</script>
+{% endblock %}

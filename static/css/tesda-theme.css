@@ -1,0 +1,55 @@
+/* TESDA PTC-JAGNA — shared design tokens (TBGP industrial style, TESDA palette) */
+@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap");
+
+:root {
+    --charcoal: #0d0f12;
+    --slate-deep: #14171c;
+    --slate-dark: #1c2028;
+    --slate-mid: #2a303a;
+    --slate-light: #3a424f;
+    --card-surface: #222830;
+    --card-border: rgba(26, 86, 196, 0.18);
+    --accent: var(--tesda-blue-light);
+    --accent-bright: #4d7fd9;
+    --accent-dim: var(--tesda-blue-dark);
+    --accent-glow: rgba(26, 86, 196, 0.35);
+    --text-white: #ffffff;
+    --text-primary: #e8eaed;
+    --text-muted: rgba(255, 255, 255, 0.62);
+    --text-subtle: #9aa3b0;
+    --portal-page-bg: #f4f6f9;
+    --portal-text: #1a1a1a;
+    --portal-muted: #5c6470;
+    --radius-sm: 2px;
+    --radius-md: 4px;
+}
+
+html, body {
+    font-family: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Barlow Condensed", "Barlow", sans-serif;
+    letter-spacing: 0.02em;
+}
+
+.text-brand { color: var(--accent) !important; }
+
+.btn-brand {
+    background-color: var(--tesda-blue);
+    border-color: var(--tesda-blue);
+    color: #fff;
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: var(--radius-sm);
+}
+
+.btn-brand:hover,
+.btn-brand:focus {
+    background-color: var(--accent-bright);
+    border-color: var(--accent-bright);
+    color: #fff;
+    box-shadow: 0 0 16px var(--accent-glow);
+}
