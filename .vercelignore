@@ -1,0 +1,10 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+uploads/
+.git/
+*.xlsx
+dts_docs_import_template_generated.xlsx

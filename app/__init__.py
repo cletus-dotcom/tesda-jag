@@ -53,7 +53,7 @@ db = SQLAlchemy()
 def create_app():
     base = Path(__file__).parent
     template_folder = str((base.parent / "templates").resolve())
-    static_folder = str((base.parent / "static").resolve())
+    static_folder = str((base.parent / "public" / "static").resolve())
 
     app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
     app.secret_key = SECRET_KEY
@@ -110,7 +110,7 @@ def create_app():
     @app.route("/favicon.ico")
     def favicon():
         return send_from_directory(
-            os.path.join(app.root_path, "static", "images"),
+            os.path.join(app.static_folder, "images"),
             "tesda_logo.png",
             mimetype="image/png",
         )
