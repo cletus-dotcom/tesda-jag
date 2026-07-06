@@ -448,7 +448,9 @@
         .section-mobile-list { display: block; }
         .section-desktop-table { display: none; }
         @media (max-width: 767.98px) {
-            .section-card .section-mobile-list {
+            .section-card .section-mobile-list.section-scroll-panel,
+            #inboundSection .section-mobile-list,
+            #outboundSection .section-mobile-list {
                 max-height: min(52vh, 420px);
                 overflow-y: auto;
                 overscroll-behavior: contain;
@@ -458,7 +460,13 @@
                 padding: 0.65rem 0.5rem 0.35rem;
                 background: linear-gradient(180deg, #f8faff 0%, #fff 100%);
             }
-            .section-card .section-mobile-list .doc-card:last-child {
+            #outboundSection .section-mobile-list {
+                border-color: rgba(25, 135, 84, 0.15);
+                background: linear-gradient(180deg, #f4fbf7 0%, #fff 100%);
+            }
+            .section-card .section-mobile-list.section-scroll-panel .doc-card:last-child,
+            #inboundSection .section-mobile-list .doc-card:last-child,
+            #outboundSection .section-mobile-list .doc-card:last-child {
                 margin-bottom: 0.25rem;
             }
         }
@@ -731,7 +739,7 @@
                     <input type="text" class="form-control section-filter" data-section="inbound" placeholder="Search inbound documents...">
                 </div>
             </div>
-            <div class="section-mobile-list" id="inboundMobile"></div>
+            <div class="section-mobile-list section-scroll-panel" id="inboundMobile"></div>
             <div class="section-desktop-table section-table-wrap">
                 <table class="table table-hover section-table mb-0">
                     <thead>
@@ -761,7 +769,7 @@
                     <input type="text" class="form-control section-filter" data-section="outbound" placeholder="Search outbound documents...">
                 </div>
             </div>
-            <div class="section-mobile-list" id="outboundMobile"></div>
+            <div class="section-mobile-list section-scroll-panel" id="outboundMobile"></div>
             <div class="section-desktop-table section-table-wrap">
                 <table class="table table-hover section-table mb-0">
                     <thead>
