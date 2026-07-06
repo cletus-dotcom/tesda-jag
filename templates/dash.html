@@ -447,6 +447,21 @@
         .badge-outbound { background: #198754; }
         .section-mobile-list { display: block; }
         .section-desktop-table { display: none; }
+        @media (max-width: 767.98px) {
+            .section-card .section-mobile-list {
+                max-height: min(52vh, 420px);
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
+                border: 1px solid rgba(0, 51, 160, 0.08);
+                border-radius: 10px;
+                padding: 0.65rem 0.5rem 0.35rem;
+                background: linear-gradient(180deg, #f8faff 0%, #fff 100%);
+            }
+            .section-card .section-mobile-list .doc-card:last-child {
+                margin-bottom: 0.25rem;
+            }
+        }
         @media (min-width: 768px) {
             .section-mobile-list { display: none; }
             .section-desktop-table { display: block; }
