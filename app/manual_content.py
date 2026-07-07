@@ -24,18 +24,18 @@ DTS_MANUALS = {
             {
                 "heading": "Dashboard Overview",
                 "items": [
-                    "Open Dashboard from the sidebar to see today's transactions for your office, plus inbound and outbound document lists.",
+                    "Open Dashboard from the sidebar to see today's transactions for your office, plus incoming and outgoing document lists.",
                     "Use the search box inside each section to filter by route number, subject, origin, or status.",
                     "On mobile, scroll document lists inside each card to reach the next section quickly.",
-                    "Stat tiles show inbound, outbound, pending, and completed counts for the whole center.",
+                    "Stat tiles show incoming, outgoing, pending, and completed counts for the whole center.",
                 ],
             },
             {
                 "heading": "Adding and Updating Documents",
                 "items": [
-                    "Select New Document from the welcome card or top bar to register inbound or outbound mail.",
+                    "Select New Document from the welcome card or top bar to register incoming or outgoing mail.",
                     "Route numbers are auto-generated as YYMMDD plus a two-digit daily sequence (example: 26010701).",
-                    "Choose classification (Inbound or Outbound), document type, action needed, and action particulars before saving.",
+                    "Choose classification (Incoming or Outgoing), document type, action needed, and action particulars before saving.",
                     "Use Update on any row to change status, forwarding, responsible unit, or remarks — each save is logged in document history.",
                 ],
             },
@@ -69,16 +69,16 @@ DTS_MANUALS = {
                 "heading": "Daily Workflow",
                 "items": [
                     "Check Today's Transactions for documents forwarded to your office that still need action.",
-                    "Review Inbound Documents for newly received files and Outbound Documents for items leaving the center.",
-                    "Use New Document when mail arrives or when preparing an outbound submission.",
+                    "Review Incoming Documents for newly received files and Outgoing Documents for items leaving the center.",
+                    "Use New Document when mail arrives or when preparing an outgoing submission.",
                 ],
             },
             {
                 "heading": "Encoding a Document",
                 "items": [
                     "Set Date Received, origin, subject, and classification before saving.",
-                    "For Inbound mail, specify action needed, responsible unit, and forwarding when routing to an office.",
-                    "For Outbound mail, set Submitted To and status as the document moves through approval.",
+                    "For incoming mail, specify action needed, responsible unit, and forwarding when routing to an office.",
+                    "For outgoing mail, set Submitted To and status as the document moves through approval.",
                     "Add a document link (URL) when a scanned copy is stored in Drive or shared storage.",
                 ],
             },
@@ -109,7 +109,7 @@ DTS_MANUALS = {
             {
                 "heading": "Viewing the Dashboard",
                 "items": [
-                    "Sign in and open Dashboard to see today's transactions and center-wide inbound/outbound lists.",
+                    "Sign in and open Dashboard to see today's transactions and center-wide incoming/outgoing lists.",
                     "Tap View details on a mobile card or the expand arrow on desktop to read full document information.",
                     "Use section search boxes to find a route number or subject quickly.",
                 ],

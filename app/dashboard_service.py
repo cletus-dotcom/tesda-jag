@@ -1,6 +1,14 @@
 from sqlalchemy import and_
 
-from app.config import display_action_needed, display_doc_type, display_recipient
+from app.config import (
+    CLASSIFICATION_INCOMING,
+    CLASSIFICATION_OUTGOING,
+    classification_db_values,
+    display_action_needed,
+    display_doc_type,
+    display_recipient,
+    is_outgoing_classification,
+)
 from app.models import DtsDoc
 
 
@@ -29,25 +37,34 @@ def serialize_dashboard_doc(doc, include_details=False):
             "remarks": doc.remarks or "",
             "other_office": doc.other_office or "",
             "recipient_label": (
-                "Submitted To" if doc.classification == "Outbound" else "Forwarded To"
+                "Submitted To" if is_outgoing_classification(doc.classification) else "Forwarded To"
             ),
         })
     return payload
 
 
 def classification_docs_query(classification):
+    values = classification_db_values(classification)
     return (
-        DtsDoc.query.filter(DtsDoc.classification == classification)
+        DtsDoc.query.filter(DtsDoc.classification.in_(values))
         .order_by(DtsDoc.date_received.desc(), DtsDoc.route_number.desc())
     )
 
 
+def incoming_docs_query():
+    return classification_docs_query(CLASSIFICATION_INCOMING)
+
+
+def outgoing_docs_query():
+    return classification_docs_query(CLASSIFICATION_OUTGOING)
+
+
 def inbound_docs_query():
-    return classification_docs_query("Inbound")
+    return incoming_docs_query()
 
 
 def outbound_docs_query():
-    return classification_docs_query("Outbound")
+    return outgoing_docs_query()
 
 
 def office_today_transactions_query(office):
@@ -63,14 +80,16 @@ def office_today_transactions_query(office):
 
 
 def office_dashboard_stats(office):
-    inbound_docs = inbound_docs_query().all()
-    outbound_docs = outbound_docs_query().all()
+    incoming_docs = incoming_docs_query().all()
+    outgoing_docs = outgoing_docs_query().all()
     today_docs = office_today_transactions_query(office).all()
-    all_classified = inbound_docs + outbound_docs
+    all_classified = incoming_docs + outgoing_docs
 
     return {
-        "inbound_total": len(inbound_docs),
-        "outbound_total": len(outbound_docs),
+        "incoming_total": len(incoming_docs),
+        "outgoing_total": len(outgoing_docs),
+        "inbound_total": len(incoming_docs),
+        "outbound_total": len(outgoing_docs),
         "today_transactions": len(today_docs),
         "pending_total": sum(1 for doc in all_classified if doc.status != "Completed"),
         "completed_total": sum(1 for doc in all_classified if doc.status == "Completed"),

@@ -47,7 +47,9 @@ LEGACY_DEPT_CODES = {
 OFFICES = DEPARTMENTS
 RESP_UNITS = DEPARTMENTS
 
-OUTBOUND_DEFAULT_ORIGIN = "PTC-Jagna"
+OUTGOING_DEFAULT_ORIGIN = "PTC-Jagna"
+# Backward-compatible alias (internal use only).
+OUTBOUND_DEFAULT_ORIGIN = OUTGOING_DEFAULT_ORIGIN
 
 ORIGINS = [
     "Central Office",
@@ -63,11 +65,11 @@ ORIGINS = [
     "Candijay LGU",
     "Anda LGU",
     "Mabini LGU",
-    OUTBOUND_DEFAULT_ORIGIN,
+    OUTGOING_DEFAULT_ORIGIN,
     "Others",
 ]
 
-INBOUND_DOCUMENT_TYPES = [
+INCOMING_DOCUMENT_TYPES = [
     "Memorandum",
     "Memorandum Circular",
     "Office Order",
@@ -80,19 +82,45 @@ INBOUND_DOCUMENT_TYPES = [
     "Others",
 ]
 
-OUTBOUND_DOCUMENT_TYPES = [
+OUTGOING_DOCUMENT_TYPES = [
     "Reports",
     "Voucher",
     "Others",
 ]
 
-DOCUMENT_TYPES = INBOUND_DOCUMENT_TYPES
+INBOUND_DOCUMENT_TYPES = INCOMING_DOCUMENT_TYPES
+OUTBOUND_DOCUMENT_TYPES = OUTGOING_DOCUMENT_TYPES
+
+DOCUMENT_TYPES = INCOMING_DOCUMENT_TYPES
+
+CLASSIFICATION_INCOMING = "Incoming"
+CLASSIFICATION_OUTGOING = "Outgoing"
+CLASSIFICATIONS = [CLASSIFICATION_INCOMING, CLASSIFICATION_OUTGOING]
+
+
+def normalize_classification(classification):
+    value = (classification or "").strip()
+    legacy = {"Inbound": CLASSIFICATION_INCOMING, "Outbound": CLASSIFICATION_OUTGOING}
+    return legacy.get(value, value)
+
+
+def is_outgoing_classification(classification):
+    return normalize_classification(classification) == CLASSIFICATION_OUTGOING
+
+
+def classification_db_values(classification):
+    normalized = normalize_classification(classification)
+    if normalized == CLASSIFICATION_INCOMING:
+        return (CLASSIFICATION_INCOMING, "Inbound")
+    if normalized == CLASSIFICATION_OUTGOING:
+        return (CLASSIFICATION_OUTGOING, "Outbound")
+    return (normalized,)
 
 
 def document_types_for(classification):
-    if classification == "Outbound":
-        return OUTBOUND_DOCUMENT_TYPES
-    return INBOUND_DOCUMENT_TYPES
+    if is_outgoing_classification(classification):
+        return OUTGOING_DOCUMENT_TYPES
+    return INCOMING_DOCUMENT_TYPES
 
 
 def is_valid_doc_type(classification, doc_type):
@@ -130,17 +158,20 @@ ACTIONS_NEEDED = [
     "Others",
 ]
 
-INBOUND_ACTIONS_NEEDED = ACTIONS_NEEDED
+INCOMING_ACTIONS_NEEDED = ACTIONS_NEEDED
 
-OUTBOUND_ACTIONS_NEEDED = ACTIONS_NEEDED + [
+OUTGOING_ACTIONS_NEEDED = ACTIONS_NEEDED + [
     "For Submission",
 ]
 
+INBOUND_ACTIONS_NEEDED = INCOMING_ACTIONS_NEEDED
+OUTBOUND_ACTIONS_NEEDED = OUTGOING_ACTIONS_NEEDED
+
 
 def actions_needed_for(classification):
-    if classification == "Outbound":
-        return OUTBOUND_ACTIONS_NEEDED
-    return INBOUND_ACTIONS_NEEDED
+    if is_outgoing_classification(classification):
+        return OUTGOING_ACTIONS_NEEDED
+    return INCOMING_ACTIONS_NEEDED
 
 
 def is_valid_action_needed(classification, action_needed):
@@ -166,8 +197,8 @@ def display_action_needed(action_needed, action_part=None):
 
 
 def resolve_origin_fields(classification, origin, other_office):
-    if classification == "Outbound":
-        return OUTBOUND_DEFAULT_ORIGIN, None, None
+    if is_outgoing_classification(classification):
+        return OUTGOING_DEFAULT_ORIGIN, None, None
 
     origin = (origin or "").strip()
     other_office = (other_office or "").strip() if origin == "Others" else None
@@ -189,7 +220,7 @@ SUBMITTED_TO_OPTIONS = [
 
 
 def recipient_options_for(classification):
-    if classification == "Outbound":
+    if is_outgoing_classification(classification):
         return SUBMITTED_TO_OPTIONS
     from app.dept_service import list_department_names
 
@@ -197,7 +228,7 @@ def recipient_options_for(classification):
 
 
 def recipient_label_for(classification):
-    if classification == "Outbound":
+    if is_outgoing_classification(classification):
         return "Submitted To"
     return "Forwarded To"
 
@@ -231,8 +262,6 @@ def display_recipient(forwarded_to, forwarded_to_part=None, classification=None)
 
 
 STATUSES = ["Pending", "In Progress", "Completed", "Forwarded", "Received"]
-
-CLASSIFICATIONS = ["Inbound", "Outbound"]
 
 USER_ROLES = ["Admin", "Staff", "Employee"]
 

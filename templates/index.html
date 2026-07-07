@@ -76,7 +76,7 @@
                         </div>
                     </div>
                     <div class="metric-chips">
-                        <span class="metric-chip"><i class="bi bi-inbox"></i> <span id="dtsInbound">—</span> New Inbound Docs</span>
+                        <span class="metric-chip"><i class="bi bi-inbox"></i> <span id="dtsIncoming">—</span> New Incoming Docs</span>
                         <span class="metric-chip"><i class="bi bi-hourglass-split"></i> <span id="dtsPending">—</span> Pending Approvals</span>
                     </div>
                     <a href="{{ url_for('main_routes.login', next='/dashboard') }}" class="module-action">
@@ -169,7 +169,7 @@
             const data = await res.json();
             if (data.error) return;
 
-            document.getElementById("dtsInbound").textContent = data.dts.new_inbound;
+            document.getElementById("dtsIncoming").textContent = data.dts.new_incoming ?? data.dts.new_inbound;
             document.getElementById("dtsPending").textContent = data.dts.pending_approvals;
             document.getElementById("rmtProfiles").textContent = data.rmt.active_profiles;
             document.getElementById("rmtBatches").textContent = data.rmt.class_batches;

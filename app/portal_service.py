@@ -1,7 +1,7 @@
 from sqlalchemy import func, or_, tuple_
 
 from app import db
-from app.config import display_recipient
+from app.config import CLASSIFICATION_INCOMING, classification_db_values, display_recipient
 from app.models import DtsDoc, DtsHistory, RmtRecord
 
 
@@ -46,11 +46,12 @@ def _format_rmt_action(record):
     }
 
 
-def _count_inbound_active():
+def _count_incoming_active():
+    values = classification_db_values(CLASSIFICATION_INCOMING)
     return (
         db.session.query(func.count(DtsDoc.id))
         .filter(
-            DtsDoc.classification == "Inbound",
+            DtsDoc.classification.in_(values),
             or_(
                 DtsDoc.status.is_(None),
                 func.lower(DtsDoc.status) != "completed",
@@ -105,7 +106,7 @@ def _count_distinct_cabinets():
 
 
 def portal_pulse_data():
-    new_inbound = _count_inbound_active()
+    new_incoming = _count_incoming_active()
     pending_approvals = _count_pending_approvals()
     total_records = _count_rmt_records()
     record_type_count = _count_distinct_record_types()
@@ -135,7 +136,8 @@ def portal_pulse_data():
 
     return {
         "dts": {
-            "new_inbound": new_inbound,
+            "new_incoming": new_incoming,
+            "new_inbound": new_incoming,
             "pending_approvals": pending_approvals,
         },
         "rmt": {

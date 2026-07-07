@@ -34,6 +34,7 @@ from app.config import (
     is_admin_role,
     is_reserved_username,
     is_valid_user_role,
+    normalize_classification,
     normalize_role,
     safe_login_redirect,
     verify_portal_admin_credentials,
@@ -47,10 +48,10 @@ from app.dept_service import (
     validate_dept_fields,
 )
 from app.dashboard_service import (
-    inbound_docs_query,
+    incoming_docs_query,
     office_dashboard_stats,
     office_today_transactions_query,
-    outbound_docs_query,
+    outgoing_docs_query,
     serialize_dashboard_doc,
 )
 from app.about_content import (
@@ -429,32 +430,44 @@ def get_todays_docs():
         return jsonify({"error": str(e)}), 500
 
 
-@main_routes.route("/get_inbound_docs")
+@main_routes.route("/get_incoming_docs")
 @login_required
-def get_inbound_docs():
+def get_incoming_docs():
     user = resolve_session_user()
     if not user:
         return jsonify({"error": "User not found"}), 404
 
     try:
-        docs = inbound_docs_query().all()
+        docs = incoming_docs_query().all()
         return jsonify([serialize_dashboard_doc(doc, include_details=True) for doc in docs])
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@main_routes.route("/get_outgoing_docs")
+@login_required
+def get_outgoing_docs():
+    user = resolve_session_user()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    try:
+        docs = outgoing_docs_query().all()
+        return jsonify([serialize_dashboard_doc(doc, include_details=True) for doc in docs])
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@main_routes.route("/get_inbound_docs")
+@login_required
+def get_inbound_docs():
+    return get_incoming_docs()
 
 
 @main_routes.route("/get_outbound_docs")
 @login_required
 def get_outbound_docs():
-    user = resolve_session_user()
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-
-    try:
-        docs = outbound_docs_query().all()
-        return jsonify([serialize_dashboard_doc(doc, include_details=True) for doc in docs])
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    return get_outgoing_docs()
 
 
 @main_routes.route("/view_history/<string:route_number>")
@@ -486,6 +499,7 @@ def update_document(route_number):
     if not doc:
         flash("Document not found.", "warning")
         return redirect(url_for("portal_admin_routes.console") if is_portal_admin_session() else url_for("main_routes.dashboard"))
+    doc.classification = normalize_classification(doc.classification)
     return render_template("update_document.html", doc=doc)
 
 
@@ -499,7 +513,7 @@ def save_update(route_number):
         return redirect(url_for("portal_admin_routes.console") if is_portal_admin_session() else url_for("main_routes.dashboard"))
 
     try:
-        doc.classification = request.form.get("classification")
+        doc.classification = normalize_classification(request.form.get("classification"))
         doc_type, doc_type_part, doc_type_error = parse_doc_type_fields(
             request.form.get("doc_type"),
             request.form.get("doc_type_part"),
@@ -584,7 +598,7 @@ def add_document():
 
     if request.method == "POST":
         try:
-            classification = request.form.get("classification")
+            classification = normalize_classification(request.form.get("classification"))
             doc_type, doc_type_part, doc_type_error = parse_doc_type_fields(
                 request.form.get("doc_type"),
                 request.form.get("doc_type_part"),
@@ -662,7 +676,7 @@ def add_document():
             db.session.add(new_doc)
             db.session.commit()
             log_history(new_doc, session.get("fullname", "Unknown"), request.remote_addr)
-            flash(f"Document #{route_number} added successfully!", "success")
+            flash(f"Route #{route_number} added successfully!", "success")
             return redirect(url_for("portal_admin_routes.console") if is_portal_admin_session() else url_for("main_routes.dashboard"))
         except Exception as e:
             db.session.rollback()
@@ -712,7 +726,7 @@ def validate_route_number():
         })
 
     if len(check_number) != 8 or not check_number.isdigit():
-        return jsonify({"error": "Invalid document number format (expected YYMMDDNN)"}), 400
+        return jsonify({"error": "Invalid route number format (expected YYMMDDNN)"}), 400
 
     existing_doc = DtsDoc.query.filter_by(route_number=check_number).first()
     return jsonify({
@@ -891,7 +905,7 @@ def export_docs_pdf():
 
     elements.extend([header_table, Spacer(1, 12), Paragraph("List of Documents", title_style), Spacer(1, 10)])
 
-    table_data = [["Doc #", "Class", "Origin", "Subject", "Status", "Action Provided", "Forwarded / Submitted To"]]
+    table_data = [["Route #", "Class", "Origin", "Subject", "Status", "Action Provided", "Forwarded / Submitted To"]]
     for d in docs:
         table_data.append([
             d.route_number,

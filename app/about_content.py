@@ -8,7 +8,7 @@ ABOUT_PLATFORM = {
     ),
     "intro": (
         "This portal helps your team work with less paper chasing and more clarity. "
-        "Whether you are routing inbound mail, filing scanned records, or checking asset status, "
+        "Whether you are routing incoming mail, filing scanned records, or checking asset status, "
         "everything starts from one place — built for everyday office work, not just IT experts."
     ),
 }
@@ -18,7 +18,7 @@ ABOUT_FEATURES = [
         "icon": "bi-folder2-open",
         "title": "Document Tracking (DTS)",
         "description": (
-            "Register, route, and follow up on inbound and outbound documents. "
+            "Register, route, and follow up on incoming and outgoing documents. "
             "Every update is logged so nothing gets lost between offices."
         ),
     },

@@ -12,6 +12,7 @@ from app.config import (
     parse_doc_type_fields,
     parse_recipient_fields,
     parse_rmt_record_type_fields,
+    normalize_classification,
     resolve_origin_fields,
 )
 from app.dept_service import list_department_names
@@ -20,7 +21,7 @@ from app.utils import parse_document_date
 
 DTS_IMPORT_FIELDS = [
     ("route_number", "Route Number", True),
-    ("classification", "Classification (Inbound/Outbound)", True),
+    ("classification", "Classification (Incoming/Outgoing)", True),
     ("doc_type", "Document Type", True),
     ("doc_type_part", "Document Type (if Others)", False),
     ("date_received", "Date Received (YYYY-MM-DD)", True),
@@ -228,9 +229,9 @@ def validate_dts_row(record):
     elif DtsDoc.query.filter_by(route_number=route_number).first():
         errors.append(f"Route number '{route_number}' already exists in the database.")
 
-    classification = data.get("classification", "").strip()
+    classification = normalize_classification(data.get("classification", "").strip())
     if classification not in CLASSIFICATIONS:
-        errors.append("Classification must be Inbound or Outbound.")
+        errors.append("Classification must be Incoming or Outgoing.")
 
     doc_type, doc_type_part, doc_type_error = parse_doc_type_fields(
         data.get("doc_type"),

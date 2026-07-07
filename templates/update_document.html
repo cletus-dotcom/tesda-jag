@@ -57,7 +57,7 @@
                     <input type="date" name="date_received" value="{{ doc.date_received }}" class="form-control" required>
                 </div>
                 <div class="col-6 col-md-3">
-                    <label>Document Number</label>
+                    <label>Route No.</label>
                     <input type="text" value="{{ doc.route_number }}" class="form-control bg-light" readonly>
                 </div>
                 <div class="col-6 col-md-3">
@@ -155,28 +155,28 @@
 {% block extra_js %}
 <script>
     const docTypesByClassification = {
-        Inbound: {{ document_types_inbound | tojson }},
-        Outbound: {{ document_types_outbound | tojson }}
+        Incoming: {{ document_types_incoming | tojson }},
+        Outgoing: {{ document_types_outgoing | tojson }}
     };
     const actionsByClassification = {
-        Inbound: {{ actions_needed_inbound | tojson }},
-        Outbound: {{ actions_needed_outbound | tojson }}
+        Incoming: {{ actions_needed_incoming | tojson }},
+        Outgoing: {{ actions_needed_outgoing | tojson }}
     };
     const currentDocType = {{ doc.doc_type | tojson }};
     const currentActionNeeded = {{ doc.action_needed | tojson }};
     const currentForwardedTo = {{ doc.forwarded_to | tojson }};
-    const outboundDefaultOrigin = {{ outbound_default_origin | tojson }};
+    const outgoingDefaultOrigin = {{ outgoing_default_origin | tojson }};
     const recipientsByClassification = {
-        Inbound: {{ forwarded_to_options | tojson }},
-        Outbound: {{ submitted_to_options | tojson }}
+        Incoming: {{ forwarded_to_options | tojson }},
+        Outgoing: {{ submitted_to_options | tojson }}
     };
     const recipientLabels = {
-        Inbound: 'Forwarded To',
-        Outbound: 'Submitted To'
+        Incoming: 'Forwarded To',
+        Outgoing: 'Submitted To'
     };
     const recipientPartLabels = {
-        Inbound: 'Specify Forwarded To',
-        Outbound: 'Specify Submitted To'
+        Incoming: 'Specify Forwarded To',
+        Outgoing: 'Specify Submitted To'
     };
 
     function updateDocTypeOptions(selectedType = '') {
@@ -265,8 +265,8 @@
         const otherOfficeField = document.getElementById('otherOfficeField');
         const otherOfficeInput = otherOfficeField.querySelector('input[name="other_office"]');
 
-        if (classificationSelect.value === 'Outbound') {
-            originSelect.value = outboundDefaultOrigin;
+        if (classificationSelect.value === 'Outgoing') {
+            originSelect.value = outgoingDefaultOrigin;
             originSelect.disabled = true;
             originSelect.classList.add('bg-light');
             otherOfficeField.style.display = 'none';
@@ -274,7 +274,7 @@
         } else {
             originSelect.disabled = false;
             originSelect.classList.remove('bg-light');
-            if (originSelect.value === outboundDefaultOrigin) {
+            if (originSelect.value === outgoingDefaultOrigin) {
                 originSelect.value = '';
             }
             toggleOtherOffice();

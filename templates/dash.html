@@ -443,14 +443,14 @@
             white-space: nowrap;
         }
         .section-table tbody tr:hover { background: #f8faff; }
-        .badge-inbound { background: #0d6efd; }
-        .badge-outbound { background: #198754; }
+        .badge-incoming { background: #0d6efd; }
+        .badge-outgoing { background: #198754; }
         .section-mobile-list { display: block; }
         .section-desktop-table { display: none; }
         @media (max-width: 767.98px) {
             .section-card .section-mobile-list.section-scroll-panel,
-            #inboundSection .section-mobile-list,
-            #outboundSection .section-mobile-list {
+            #incomingSection .section-mobile-list,
+            #outgoingSection .section-mobile-list {
                 max-height: min(52vh, 420px);
                 overflow-y: auto;
                 overscroll-behavior: contain;
@@ -460,13 +460,13 @@
                 padding: 0.65rem 0.5rem 0.35rem;
                 background: linear-gradient(180deg, #f8faff 0%, #fff 100%);
             }
-            #outboundSection .section-mobile-list {
+            #outgoingSection .section-mobile-list {
                 border-color: rgba(25, 135, 84, 0.15);
                 background: linear-gradient(180deg, #f4fbf7 0%, #fff 100%);
             }
             .section-card .section-mobile-list.section-scroll-panel .doc-card:last-child,
-            #inboundSection .section-mobile-list .doc-card:last-child,
-            #outboundSection .section-mobile-list .doc-card:last-child {
+            #incomingSection .section-mobile-list .doc-card:last-child,
+            #outgoingSection .section-mobile-list .doc-card:last-child {
                 margin-bottom: 0.25rem;
             }
         }
@@ -639,12 +639,12 @@
                     <div class="stat-label">Today's Transactions</div>
                 </div>
                 <div class="stat-tile">
-                    <div class="stat-value" id="statInbound">—</div>
-                    <div class="stat-label">Inbound</div>
+                    <div class="stat-value" id="statIncoming">—</div>
+                    <div class="stat-label">Incoming</div>
                 </div>
                 <div class="stat-tile">
-                    <div class="stat-value" id="statOutbound">—</div>
-                    <div class="stat-label">Outbound</div>
+                    <div class="stat-value" id="statOutgoing">—</div>
+                    <div class="stat-label">Outgoing</div>
                 </div>
                 <div class="stat-tile">
                     <div class="stat-value" id="statPending">—</div>
@@ -674,7 +674,7 @@
                     <thead>
                         <tr>
                             <th style="width: 36px;"></th>
-                            <th>Doc #</th>
+                            <th>Route #</th>
                             <th>Date</th>
                             <th>Type</th>
                             <th>Origin</th>
@@ -687,24 +687,24 @@
             </div>
         </div>
 
-        <div class="dashboard-card section-card" id="inboundSection">
+        <div class="dashboard-card section-card" id="incomingSection">
             <div class="section-header">
                 <div>
-                    <h5><i class="bi bi-box-arrow-in-down"></i> Inbound Documents</h5>
-                    <p class="section-subtitle">All received inbound documents across the center</p>
+                    <h5><i class="bi bi-box-arrow-in-down"></i> Incoming Documents</h5>
+                    <p class="section-subtitle">All received incoming documents across the center</p>
                 </div>
                 <div class="section-search">
                     <i class="bi bi-search"></i>
-                    <input type="text" class="form-control section-filter" data-section="inbound" placeholder="Search inbound documents...">
+                    <input type="text" class="form-control section-filter" data-section="incoming" placeholder="Search incoming documents...">
                 </div>
             </div>
-            <div class="section-mobile-list section-scroll-panel" id="inboundMobile"></div>
+            <div class="section-mobile-list section-scroll-panel" id="incomingMobile"></div>
             <div class="section-desktop-table section-table-wrap">
                 <table class="table table-hover section-table mb-0">
                     <thead>
                         <tr>
                             <th style="width: 36px;"></th>
-                            <th>Doc #</th>
+                            <th>Route #</th>
                             <th>Date</th>
                             <th>Type</th>
                             <th>Origin</th>
@@ -712,29 +712,29 @@
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody id="inboundTableBody"></tbody>
+                    <tbody id="incomingTableBody"></tbody>
                 </table>
             </div>
         </div>
 
-        <div class="dashboard-card section-card" id="outboundSection">
+        <div class="dashboard-card section-card" id="outgoingSection">
             <div class="section-header">
                 <div>
-                    <h5><i class="bi bi-box-arrow-up-right"></i> Outbound Documents</h5>
-                    <p class="section-subtitle">All outgoing outbound documents across the center</p>
+                    <h5><i class="bi bi-box-arrow-up-right"></i> Outgoing Documents</h5>
+                    <p class="section-subtitle">All outgoing documents across the center</p>
                 </div>
                 <div class="section-search">
                     <i class="bi bi-search"></i>
-                    <input type="text" class="form-control section-filter" data-section="outbound" placeholder="Search outbound documents...">
+                    <input type="text" class="form-control section-filter" data-section="outgoing" placeholder="Search outgoing documents...">
                 </div>
             </div>
-            <div class="section-mobile-list section-scroll-panel" id="outboundMobile"></div>
+            <div class="section-mobile-list section-scroll-panel" id="outgoingMobile"></div>
             <div class="section-desktop-table section-table-wrap">
                 <table class="table table-hover section-table mb-0">
                     <thead>
                         <tr>
                             <th style="width: 36px;"></th>
-                            <th>Doc #</th>
+                            <th>Route #</th>
                             <th>Date</th>
                             <th>Type</th>
                             <th>Submitted To</th>
@@ -742,7 +742,7 @@
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody id="outboundTableBody"></tbody>
+                    <tbody id="outgoingTableBody"></tbody>
                 </table>
             </div>
         </div>
@@ -851,7 +851,7 @@
             const body = document.body;
             const listUsersModal = document.getElementById('listUsersModal');
             const tbody = document.getElementById('usersTableBody');
-            const sectionData = { today: [], inbound: [], outbound: [] };
+            const sectionData = { today: [], incoming: [], outgoing: [] };
 
             const isDesktop = () => window.matchMedia('(min-width: 992px)').matches;
 
@@ -960,7 +960,7 @@
                     : (doc.origin || '-');
                 return `
                     <div class="detail-grid">
-                        <div class="detail-item"><label>Document No.</label><span>${escapeHtml(doc.route_number)}</span></div>
+                        <div class="detail-item"><label>Route No.</label><span>${escapeHtml(doc.route_number)}</span></div>
                         <div class="detail-item"><label>Date Received</label><span>${escapeHtml(doc.date_received || '-')}</span></div>
                         <div class="detail-item"><label>Document Type</label><span>${escapeHtml(doc.doc_type || '-')}</span></div>
                         <div class="detail-item"><label>Origin</label><span>${escapeHtml(originDisplay)}</span></div>
@@ -1075,31 +1075,31 @@
                 );
             }
 
-            function renderInboundSection(docs) {
-                sectionData.inbound = docs;
+            function renderIncomingSection(docs) {
+                sectionData.incoming = docs;
                 renderClassificationSection(
                     docs,
-                    'inboundTableBody',
-                    'inboundMobile',
-                    'No inbound documents found',
+                    'incomingTableBody',
+                    'incomingMobile',
+                    'No incoming documents found',
                     'origin',
                 );
             }
 
-            function renderOutboundSection(docs) {
-                sectionData.outbound = docs;
+            function renderOutgoingSection(docs) {
+                sectionData.outgoing = docs;
                 renderClassificationSection(
                     docs,
-                    'outboundTableBody',
-                    'outboundMobile',
-                    'No outbound documents found',
+                    'outgoingTableBody',
+                    'outgoingMobile',
+                    'No outgoing documents found',
                     'recipient',
                 );
             }
 
             function filterSection(section, query) {
                 const normalized = query.trim().toLowerCase();
-                if (section === 'today' || section === 'inbound' || section === 'outbound') {
+                if (section === 'today' || section === 'incoming' || section === 'outgoing') {
                     document.querySelectorAll(`#${section}TableBody tr.doc-row`).forEach(row => {
                         const haystack = row.dataset.search || '';
                         const visible = !normalized || haystack.includes(normalized);
@@ -1126,8 +1126,8 @@
                     const stats = await res.json();
                     if (stats.error) return;
                     document.getElementById('statToday').textContent = stats.today_transactions ?? 0;
-                    document.getElementById('statInbound').textContent = stats.inbound_total ?? 0;
-                    document.getElementById('statOutbound').textContent = stats.outbound_total ?? 0;
+                    document.getElementById('statIncoming').textContent = stats.incoming_total ?? stats.inbound_total ?? 0;
+                    document.getElementById('statOutgoing').textContent = stats.outgoing_total ?? stats.outbound_total ?? 0;
                     document.getElementById('statPending').textContent = stats.pending_total ?? 0;
                     document.getElementById('statCompleted').textContent = stats.completed_total ?? 0;
                 } catch (err) {
@@ -1137,19 +1137,19 @@
 
             async function loadDashboardSections() {
                 try {
-                    const [todayRes, inboundRes, outboundRes] = await Promise.all([
+                    const [todayRes, incomingRes, outgoingRes] = await Promise.all([
                         fetch('/get_todays_docs'),
-                        fetch('/get_inbound_docs'),
-                        fetch('/get_outbound_docs'),
+                        fetch('/get_incoming_docs'),
+                        fetch('/get_outgoing_docs'),
                     ]);
-                    const [todayDocs, inboundDocs, outboundDocs] = await Promise.all([
+                    const [todayDocs, incomingDocs, outgoingDocs] = await Promise.all([
                         todayRes.json(),
-                        inboundRes.json(),
-                        outboundRes.json(),
+                        incomingRes.json(),
+                        outgoingRes.json(),
                     ]);
                     if (Array.isArray(todayDocs)) renderTodaySection(todayDocs);
-                    if (Array.isArray(inboundDocs)) renderInboundSection(inboundDocs);
-                    if (Array.isArray(outboundDocs)) renderOutboundSection(outboundDocs);
+                    if (Array.isArray(incomingDocs)) renderIncomingSection(incomingDocs);
+                    if (Array.isArray(outgoingDocs)) renderOutgoingSection(outgoingDocs);
                 } catch (err) {
                     console.error('Failed to load dashboard documents:', err);
                 }
