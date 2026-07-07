@@ -121,6 +121,7 @@
             color: rgba(255, 255, 255, 0.92);
             text-decoration: none;
             font-size: 0.9rem;
+            border-radius: 6px;
         }
         .sidebar-nav a:hover, .sidebar-nav a.active {
             background: rgba(255, 255, 255, 0.12);
@@ -314,14 +315,13 @@
             <p class="sidebar-label">Records</p>
             <ul class="sidebar-nav">
                 <li><a href="{{ url_for('rmt_routes.dashboard') }}" class="active"><i class="bi bi-archive"></i> RMT Dashboard</a></li>
-                <li><a href="{{ url_for('pmis_routes.dashboard') }}"><i class="bi bi-box-seam"></i> P.M.I.S.</a></li>
                 <li><a href="{{ url_for('main_routes.dashboard') }}"><i class="bi bi-speedometer2"></i> Document Tracker</a></li>
-                <li><a href="{{ url_for('main_routes.index') }}"><i class="bi bi-house"></i> Home</a></li>
-                {% if not is_portal_admin_role(session.get('role')) %}
-                <li><a href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal"><i class="bi bi-key"></i> Change Password</a></li>
-                {% endif %}
-                <li><a href="{{ url_for('main_routes.logout') }}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                <li><a href="{{ url_for('main_routes.list_docs') }}"><i class="bi bi-files"></i> List Documents</a></li>
+                <li><a href="{{ url_for('pmis_routes.dashboard') }}"><i class="bi bi-box-seam"></i> P.M.I.S.</a></li>
             </ul>
+
+            {% set sidebar_module = 'rmt' %}
+            {% include 'partials/module_sidebar_extras.html' %}
         </div>
         <div class="sidebar-footer">
             <img src="{{ url_for('static', filename='images/tesda_logo.png') }}" alt="TESDA" class="sidebar-logo">
@@ -397,6 +397,7 @@
     {% endif %}
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/module-sidebar.js') }}"></script>
     <script src="{{ url_for('static', filename='js/brand-tagline-marquee.js') }}"></script>
     <script>
         const canEditRecords = {{ 'true' if can_edit else 'false' }};

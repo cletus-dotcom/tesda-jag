@@ -30,6 +30,7 @@ from app.drive_service import (
     save_pdf_locally,
     upload_pdf_to_drive,
 )
+from app.manual_content import get_rmt_manual, resolve_manual_role
 from app.models import RmtRecord, User
 from app.rmt_service import (
     rmt_dashboard_stats,
@@ -145,6 +146,28 @@ def dashboard():
         "rmt_dash.html",
         drive_configured=drive_configured(),
         **_dashboard_context(user),
+    )
+
+
+@rmt_routes.route("/help/rmt-manual")
+@login_required
+def rmt_user_manual():
+    user = _current_user()
+    if not user:
+        flash("User not found. Please log in again.", "danger")
+        return redirect(url_for("main_routes.logout"))
+
+    role = resolve_manual_role(session.get("role"))
+    return render_template(
+        "user_manual.html",
+        manual=get_rmt_manual(role),
+        module="rmt",
+        module_label="Records Management Tool (RMT)",
+        role=role,
+        fullname=user.full_name or "Guest",
+        office=user.office or "",
+        sidebar_help_open=True,
+        sidebar_help_page="rmt",
     )
 
 

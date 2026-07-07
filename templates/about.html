@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ platform.page_title }} — TESDA PTC-JAGNA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tesda-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app-navbar.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/tesda_logo.png') }}">
+    <style>
+        :root {
+            --tesda-blue: {{ tesda_blue }};
+            --tesda-blue-dark: {{ tesda_blue_dark }};
+            --tesda-blue-light: {{ tesda_blue_light }};
+            --sidebar-bg: #002080;
+            --sidebar-width: 260px;
+        }
+        body {
+            margin: 0;
+            font-family: "Barlow", system-ui, sans-serif;
+            background: linear-gradient(165deg, #f8faff 0%, #e8eef8 100%);
+            min-height: 100vh;
+        }
+        body.dashboard-layout { padding-top: var(--app-chrome-offset); }
+        @media (min-width: 992px) {
+            body.dashboard-layout { padding-left: var(--sidebar-width); }
+        }
+        .sidebar {
+            position: fixed;
+            top: var(--app-chrome-offset);
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            color: #fff;
+            overflow-y: auto;
+            z-index: 1000;
+            padding: 1rem 0;
+            transform: translateX(-110%);
+            transition: transform 0.25s ease;
+        }
+        body.sidebar-open .sidebar { transform: translateX(0); }
+        body.sidebar-open::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 900;
+        }
+        @media (min-width: 992px) {
+            .sidebar { transform: translateX(0); }
+            body.sidebar-open::before { display: none; }
+        }
+        .sidebar-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 0.5rem 1.25rem;
+        }
+        .sidebar-nav { list-style: none; padding: 0; margin: 0 0 0.5rem; }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.65rem 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+        }
+        .sidebar-nav a:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+        .main-content { padding: 1.25rem 1rem 2rem; max-width: 1100px; }
+        .dashboard-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0, 51, 160, 0.08);
+            border: 1px solid rgba(0, 51, 160, 0.06);
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+        .text-tesda { color: var(--tesda-blue); }
+        .about-dev-card {
+            background: linear-gradient(135deg, var(--tesda-blue-dark) 0%, var(--tesda-blue) 70%, var(--tesda-blue-light) 100%);
+            color: #fff;
+            border: none;
+        }
+        .about-dev-card a { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
+        .about-dev-card .text-muted { color: rgba(255, 255, 255, 0.78) !important; }
+        .about-page-header {
+            margin-bottom: 1.25rem;
+        }
+        .about-page-eyebrow {
+            font-family: "Barlow Condensed", sans-serif;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--tesda-blue-light);
+            margin: 0 0 0.35rem;
+        }
+        .about-page-title {
+            font-family: "Barlow Condensed", sans-serif;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 800;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            color: var(--tesda-blue-dark);
+            margin: 0 0 0.35rem;
+            line-height: 1.15;
+        }
+        .about-page-subtitle {
+            font-size: 0.95rem;
+            color: #64748b;
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="has-app-navbar has-breadcrumbs dashboard-layout">
+    {% set breadcrumbs = [
+        {'label': 'Home', 'url': url_for('main_routes.index')},
+        {'label': 'About the Platform'}
+    ] %}
+    {% set navbar_title = 'About the Platform' %}
+    {% set navbar_menu_toggle = true %}
+    {% include 'partials/app_navbar.html' %}
+
+    <aside id="sidebar" class="sidebar" aria-label="Help navigation">
+        <p class="sidebar-label">Navigation</p>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('main_routes.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('main_routes.list_docs') }}"><i class="bi bi-files"></i> List Documents</a></li>
+            <li><a href="{{ url_for('rmt_routes.dashboard') }}"><i class="bi bi-archive"></i> Records Management</a></li>
+            <li><a href="{{ url_for('pmis_routes.dashboard') }}"><i class="bi bi-box-seam"></i> P.M.I.S.</a></li>
+        </ul>
+
+        {% set sidebar_module = 'manual' %}
+        {% set sidebar_help_open = true %}
+        {% set sidebar_help_page = 'about' %}
+        {% include 'partials/module_sidebar_extras.html' %}
+
+        <div class="sidebar-footer text-center pt-3 px-3">
+            <img src="{{ url_for('static', filename='images/tesda_logo.png') }}" alt="TESDA" style="max-width:72px;opacity:0.85;">
+            <div class="text-white-50 small mt-2">&copy; TESDA PTC-JAGNA</div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="about-page-header">
+            <p class="about-page-eyebrow">Help</p>
+            <h1 class="about-page-title">{{ platform.page_title }}</h1>
+            <p class="about-page-subtitle">{{ platform.page_subtitle }}</p>
+        </header>
+
+        <div class="dashboard-card manual-hero">
+            <h2 class="h5 text-tesda fw-bold mb-2">
+                <i class="bi bi-info-circle"></i> {{ platform.title }}
+            </h2>
+            <p class="lead mb-2" style="font-size:1.05rem;">{{ platform.tagline }}</p>
+            <p class="text-muted mb-0">{{ platform.intro }}</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h5 class="text-tesda fw-bold mb-1"><i class="bi bi-grid-3x3-gap"></i> What you can do here</h5>
+            <p class="text-muted small mb-3">Three tools, one login — each module supports a different part of center operations.</p>
+            <div class="row g-3">
+                {% for feature in features %}
+                <div class="col-md-6 col-xl-4">
+                    <div class="about-feature-card h-100">
+                        <div class="about-feature-icon"><i class="bi {{ feature.icon }}"></i></div>
+                        <h6 class="fw-bold text-tesda">{{ feature.title }}</h6>
+                        <p class="small text-muted mb-0">{{ feature.description }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <h5 class="text-tesda fw-bold mb-3"><i class="bi bi-diagram-2"></i> How teams typically use it</h5>
+            <div class="about-flow">
+                {% for step in process_flow %}
+                <div class="about-flow-step">
+                    <div class="about-flow-number">{{ loop.index }}</div>
+                    <div>
+                        <h6 class="fw-bold mb-1">{{ step.title }}</h6>
+                        <p class="small text-muted mb-0">{{ step.description }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="row g-3">
+            {% for extra in extras %}
+            <div class="col-md-4">
+                <div class="dashboard-card h-100 mb-0">
+                    <h6 class="text-tesda fw-bold"><i class="bi bi-lightbulb"></i> {{ extra.heading }}</h6>
+                    <p class="small text-muted mb-0">{{ extra.text }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="dashboard-card about-dev-card">
+            <h5 class="fw-bold mb-2"><i class="bi bi-code-slash"></i> Developed by {{ developer.name }}</h5>
+            <p class="mb-3" style="opacity:0.92;">{{ developer.blurb }}</p>
+            <ul class="list-unstyled small mb-0">
+                <li class="mb-2">
+                    <i class="bi bi-geo-alt-fill me-2"></i>{{ developer.address }}
+                </li>
+                <li class="mb-2">
+                    <i class="bi bi-telephone-fill me-2"></i>
+                    <a href="{{ developer.phone_href }}">{{ developer.phone }}</a>
+                </li>
+                <li>
+                    <i class="bi bi-envelope-fill me-2"></i>
+                    <a href="{{ developer.email_href }}">{{ developer.email }}</a>
+                </li>
+            </ul>
+            <p class="small text-muted mt-3 mb-0">
+                For support, training, or customization requests, reach out by phone or email during business hours.
+            </p>
+        </div>
+    </main>
+
+    {% if not is_portal_admin_role(session.get('role')) %}
+    {% include 'partials/change_password_modal.html' %}
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/module-sidebar.js') }}"></script>
+    <script>
+        (function () {
+            var toggle = document.getElementById("menuToggle");
+            var sidebar = document.getElementById("sidebar");
+            toggle?.addEventListener("click", function () {
+                document.body.classList.toggle("sidebar-open");
+            });
+            document.addEventListener("click", function (e) {
+                if (!document.body.classList.contains("sidebar-open")) return;
+                if (!sidebar?.contains(e.target) && !toggle?.contains(e.target)) {
+                    document.body.classList.remove("sidebar-open");
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

@@ -599,51 +599,10 @@
                     <i class="bi bi-box-seam"></i> P.M.I.S.
                 </a>
             </li>
-            <li>
-                <a href="{{ url_for('main_routes.index') }}">
-                    <i class="bi bi-house"></i> Home
-                </a>
-            </li>
         </ul>
 
-        {% if is_admin_role(session.get('role')) %}
-        <p class="sidebar-label">Administration</p>
-        <ul class="sidebar-nav">
-            <li>
-                <button class="sidebar-link" id="adminOptionsBtn" type="button">
-                    <i class="bi bi-gear"></i> Admin Options
-                    <i class="bi bi-chevron-down ms-auto" id="adminChevron" style="font-size:0.75rem;"></i>
-                </button>
-            </li>
-        </ul>
-        <div id="adminSubMenu" class="d-none">
-            {% if is_portal_admin_role(session.get('role')) %}
-            <a href="{{ url_for('portal_admin_routes.console') }}" class="sidebar-sublink">Portal Console</a>
-            {% endif %}
-            <button id="manageUsersBtn" class="sidebar-sublink" type="button"
-                data-bs-toggle="modal" data-bs-target="#listUsersModal">Manage Users</button>
-            <a href="{{ url_for('main_routes.dept_ref_code') }}" class="sidebar-sublink">Manage Departments</a>
-            <a href="{{ url_for('main_routes.backup_database') }}" class="sidebar-sublink">Back-up Database</a>
-        </div>
-        {% endif %}
-
-        {% if not is_portal_admin_role(session.get('role')) %}
-        <ul class="sidebar-nav">
-            <li>
-                <button type="button" class="sidebar-link" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-                    <i class="bi bi-key"></i> Change Password
-                </button>
-            </li>
-        </ul>
-        {% endif %}
-
-        <ul class="sidebar-nav mt-2">
-            <li>
-                <a href="/logout">
-                    <i class="bi bi-box-arrow-right"></i> Logout
-                </a>
-            </li>
-        </ul>
+        {% set sidebar_module = 'dts' %}
+        {% include 'partials/module_sidebar_extras.html' %}
 
         <div class="sidebar-footer">
             <img src="{{ url_for('static', filename='images/tesda_logo.png') }}" alt="TESDA" class="sidebar-logo">
@@ -882,6 +841,7 @@
     {% endif %}
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/module-sidebar.js') }}"></script>
     <script src="{{ url_for('static', filename='js/brand-tagline-marquee.js') }}"></script>
     <script>
         const canEditDocuments = {{ 'true' if can_edit else 'false' }};
@@ -913,17 +873,6 @@
                 if (isDesktop()) return;
                 const clickInside = sidebar.contains(e.target) || menuToggle?.contains(e.target);
                 if (!clickInside) closeSidebar();
-            });
-
-            document.getElementById('adminOptionsBtn')?.addEventListener('click', e => {
-                e.stopPropagation();
-                const sub = document.getElementById('adminSubMenu');
-                const chevron = document.getElementById('adminChevron');
-                sub?.classList.toggle('d-none');
-                if (chevron) {
-                    chevron.classList.toggle('bi-chevron-down');
-                    chevron.classList.toggle('bi-chevron-up');
-                }
             });
 
             listUsersModal?.addEventListener('shown.bs.modal', async () => {

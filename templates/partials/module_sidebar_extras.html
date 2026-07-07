@@ -1,0 +1,78 @@
+{# Expandable Help / Administration and footer links — include after module nav.
+   Set sidebar_module: dts | rmt | pmis | manual
+   Optional: sidebar_help_open, sidebar_admin_open (bool)
+   Optional: sidebar_manual_active: dts | rmt #}
+
+<ul class="sidebar-nav sidebar-nav-help">
+    <li>
+        <button class="sidebar-link sidebar-section-toggle" type="button"
+                data-target="helpSubMenu" data-chevron="helpChevron"
+                aria-expanded="{{ 'true' if sidebar_help_open else 'false' }}">
+            <i class="bi bi-question-circle"></i> Help
+            <i class="bi {{ 'bi-chevron-up' if sidebar_help_open else 'bi-chevron-down' }} ms-auto sidebar-chevron" id="helpChevron"></i>
+        </button>
+    </li>
+</ul>
+<div id="helpSubMenu" class="sidebar-submenu{% if not sidebar_help_open %} d-none{% endif %}">
+    <a href="{{ url_for('main_routes.dts_user_manual') }}"
+       class="sidebar-sublink{% if sidebar_help_page == 'dts' or sidebar_manual_active == 'dts' %} active{% endif %}">
+        DTS User Manual
+    </a>
+    <a href="{{ url_for('rmt_routes.rmt_user_manual') }}"
+       class="sidebar-sublink{% if sidebar_help_page == 'rmt' or sidebar_manual_active == 'rmt' %} active{% endif %}">
+        RMT User Manual
+    </a>
+    <a href="{{ url_for('main_routes.about_platform') }}"
+       class="sidebar-sublink{% if sidebar_help_page == 'about' %} active{% endif %}">
+        About the Platform
+    </a>
+</div>
+
+{% if is_admin_role(session.get('role')) %}
+<ul class="sidebar-nav">
+    <li>
+        <button class="sidebar-link sidebar-section-toggle" type="button"
+                data-target="adminSubMenu" data-chevron="adminChevron"
+                aria-expanded="{{ 'true' if sidebar_admin_open else 'false' }}">
+            <i class="bi bi-gear"></i> Administration
+            <i class="bi {{ 'bi-chevron-up' if sidebar_admin_open else 'bi-chevron-down' }} ms-auto sidebar-chevron" id="adminChevron"></i>
+        </button>
+    </li>
+</ul>
+<div id="adminSubMenu" class="sidebar-submenu{% if not sidebar_admin_open %} d-none{% endif %}">
+    {% if is_portal_admin_role(session.get('role')) %}
+    <a href="{{ url_for('portal_admin_routes.console') }}" class="sidebar-sublink">Portal Console</a>
+    {% endif %}
+    {% if sidebar_module == 'dts' %}
+    <button id="manageUsersBtn" class="sidebar-sublink" type="button"
+            data-bs-toggle="modal" data-bs-target="#listUsersModal">Manage Users</button>
+    {% else %}
+    <a href="{{ url_for('main_routes.dashboard') }}" class="sidebar-sublink">Manage Users</a>
+    {% endif %}
+    <a href="{{ url_for('main_routes.dept_ref_code') }}" class="sidebar-sublink">Manage Departments</a>
+    <a href="{{ url_for('main_routes.backup_database') }}" class="sidebar-sublink">Back-up Database</a>
+</div>
+{% endif %}
+
+{% if not is_portal_admin_role(session.get('role')) %}
+<ul class="sidebar-nav">
+    <li>
+        <button type="button" class="sidebar-link" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+            <i class="bi bi-key"></i> Change Password
+        </button>
+    </li>
+</ul>
+{% endif %}
+
+<ul class="sidebar-nav sidebar-nav-footer">
+    <li>
+        <a href="{{ url_for('main_routes.index') }}">
+            <i class="bi bi-house"></i> Home
+        </a>
+    </li>
+    <li>
+        <a href="{{ url_for('main_routes.logout') }}">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+    </li>
+</ul>

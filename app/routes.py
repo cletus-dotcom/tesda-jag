@@ -53,6 +53,14 @@ from app.dashboard_service import (
     outbound_docs_query,
     serialize_dashboard_doc,
 )
+from app.about_content import (
+    ABOUT_DEVELOPER,
+    ABOUT_EXTRAS,
+    ABOUT_FEATURES,
+    ABOUT_FLOW,
+    ABOUT_PLATFORM,
+)
+from app.manual_content import get_dts_manual, resolve_manual_role
 from app.portal_service import portal_pulse_data, portal_search
 from app.session_user import is_portal_admin_session, resolve_session_user
 from app.utils import backup_tesda_db, generate_route_number, local_time, parse_document_date
@@ -159,6 +167,47 @@ def dashboard():
         role=normalize_role(user.role),
         office=user.office or "Unknown Office",
         can_edit=can_edit_documents(user.role),
+    )
+
+
+@main_routes.route("/help/dts-manual")
+@login_required
+def dts_user_manual():
+    user = resolve_session_user()
+    if not user:
+        flash("User not found. Please log in again.", "danger")
+        return redirect(url_for("main_routes.logout"))
+
+    role = resolve_manual_role(session.get("role"))
+    return render_template(
+        "user_manual.html",
+        manual=get_dts_manual(role),
+        module="dts",
+        module_label="Document Tracking System (DTS)",
+        role=role,
+        fullname=user.full_name or "Guest",
+        office=user.office or "",
+        sidebar_help_open=True,
+        sidebar_help_page="dts",
+    )
+
+
+@main_routes.route("/help/about")
+@login_required
+def about_platform():
+    user = resolve_session_user()
+    if not user:
+        flash("User not found. Please log in again.", "danger")
+        return redirect(url_for("main_routes.logout"))
+
+    return render_template(
+        "about.html",
+        platform=ABOUT_PLATFORM,
+        features=ABOUT_FEATURES,
+        process_flow=ABOUT_FLOW,
+        developer=ABOUT_DEVELOPER,
+        extras=ABOUT_EXTRAS,
+        fullname=user.full_name or "Guest",
     )
 
 
