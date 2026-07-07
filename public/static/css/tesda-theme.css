@@ -128,3 +128,235 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 0.95rem;
     border-radius: var(--radius-sm);
 }
+
+/* ── Idle career-pathway screensaver ── */
+.idle-screensaver {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background:
+        radial-gradient(circle at 18% 22%, rgba(26, 86, 196, 0.16), transparent 32%),
+        radial-gradient(circle at 82% 78%, rgba(0, 51, 160, 0.12), transparent 28%),
+        linear-gradient(160deg, rgba(8, 18, 42, 0.97), rgba(12, 28, 58, 0.95));
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+.idle-screensaver.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.idle-screensaver-panel {
+    width: min(680px, 94vw);
+    background: rgba(18, 32, 64, 0.82);
+    border: 1px solid rgba(26, 86, 196, 0.22);
+    border-left: 4px solid var(--tesda-blue-light);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    box-shadow: 0 18px 56px rgba(0, 0, 0, 0.48);
+    backdrop-filter: blur(8px);
+}
+
+.idle-screensaver-title {
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: clamp(1.8rem, 6vw, 3.25rem);
+    line-height: 1;
+    font-weight: 800;
+    color: var(--text-white);
+    text-transform: uppercase;
+    margin: 0 0 0.75rem;
+}
+
+.idle-screensaver-title span {
+    color: var(--tesda-blue-light);
+    display: block;
+}
+
+.idle-screensaver-copy {
+    color: var(--text-muted);
+    margin: 0 0 1.25rem;
+    line-height: 1.5;
+}
+
+.idle-career-scene {
+    position: relative;
+    height: 180px;
+    overflow: hidden;
+    border: 1px solid rgba(26, 86, 196, 0.18);
+    background: rgba(8, 18, 42, 0.5);
+    margin-bottom: 1rem;
+    border-radius: var(--radius-sm);
+}
+
+.idle-career-ground {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 28px;
+    height: 3px;
+    background: var(--slate-light);
+}
+
+.idle-career-ground::before {
+    content: "";
+    position: absolute;
+    inset: -6px 0 auto;
+    height: 1px;
+    background: repeating-linear-gradient(
+        90deg,
+        var(--tesda-blue-light) 0 12px,
+        transparent 12px 24px
+    );
+    opacity: 0.45;
+}
+
+.idle-site-label {
+    position: absolute;
+    left: 50%;
+    bottom: 31px;
+    margin: 0;
+    transform: translateX(-50%) translateY(0);
+    font-family: "Barlow Condensed", sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--tesda-blue-light);
+    opacity: 0;
+    white-space: nowrap;
+    text-shadow: 0 0 12px rgba(26, 86, 196, 0.35);
+    animation: idleSiteLabelRise 4s ease-in-out infinite;
+}
+
+.idle-splash-logo {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    width: 52px;
+    height: 52px;
+    transform: translateX(-50%);
+    opacity: 0;
+    animation: idleLogoReveal 4s ease-in-out infinite;
+}
+
+.idle-splash-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+    filter: drop-shadow(0 6px 18px rgba(26, 86, 196, 0.35));
+}
+
+.idle-route-traveler {
+    position: absolute;
+    bottom: 30px;
+    left: -72px;
+    width: 56px;
+    height: 26px;
+    animation: idleRouteTravel 4.5s ease-in-out infinite;
+}
+
+.idle-route-marker {
+    position: absolute;
+    left: 0;
+    bottom: 8px;
+    width: 34px;
+    height: 10px;
+    background: var(--tesda-blue);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 0 10px rgba(26, 86, 196, 0.35);
+}
+
+.idle-route-marker::before {
+    content: "";
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 8px solid var(--tesda-blue);
+}
+
+.idle-route-wheel {
+    position: absolute;
+    right: 2px;
+    bottom: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--charcoal);
+    border: 2px solid var(--slate-light);
+    animation: idleWheelSpin 0.45s linear infinite;
+}
+
+.idle-screensaver-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.idle-screensaver-hint {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+@keyframes idleSiteLabelRise {
+    0%, 2% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0);
+    }
+    14%, 78% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-56px);
+    }
+    100% {
+        opacity: 0.75;
+        transform: translateX(-50%) translateY(-56px);
+    }
+}
+
+@keyframes idleLogoReveal {
+    0%, 16% { opacity: 0; transform: translateX(-50%) scale(0.72) translateY(8px); }
+    24%, 78% { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+    100% { opacity: 0.6; transform: translateX(-50%) scale(1) translateY(0); }
+}
+
+@keyframes idleRouteTravel {
+    0% { left: -72px; opacity: 0; }
+    10%, 82% { opacity: 1; }
+    100% { left: calc(100% + 16px); opacity: 0; }
+}
+
+@keyframes idleWheelSpin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .idle-site-label,
+    .idle-splash-logo,
+    .idle-route-traveler,
+    .idle-route-wheel {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+
+    .idle-route-traveler {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .idle-site-label {
+        transform: translateX(-50%) translateY(-56px);
+    }
+}
